@@ -1,0 +1,1752 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown to WeChat</title>
+    <!-- markdown-it -->
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"></script>
+    <!-- markdown-it 插件 -->
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it-footnote@4.0.0/dist/markdown-it-footnote.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it-task-lists@2.1.1/dist/markdown-it-task-lists.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it-sub@2.0.0/dist/markdown-it-sub.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it-sup@2.0.0/dist/markdown-it-sup.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it-abbr@2.0.0/dist/markdown-it-abbr.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 280px;
+            background: #fff;
+            border-right: 1px solid #e5e5e5;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .sidebar-header h1 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: none;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            color: #666;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab-btn.active {
+            color: #165DFF;
+            border-bottom-color: #165DFF;
+            font-weight: 500;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        /* 草稿列表 */
+        .draft-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .draft-item:hover {
+            background: #f0f0f0;
+        }
+
+        .draft-item.active {
+            background: #e8f3ff;
+            border-left: 3px solid #165DFF;
+        }
+
+        .draft-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .draft-meta {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .draft-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .draft-action-btn {
+            padding: 4px 8px;
+            font-size: 12px;
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .draft-action-btn:hover {
+            background: #f5f5f5;
+        }
+
+        .add-draft-btn {
+            width: 100%;
+            padding: 10px;
+            background: #165DFF;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .add-draft-btn:hover {
+            background: #0f4cd0;
+        }
+
+        /* 设置面板 */
+        .setting-group {
+            margin-bottom: 24px;
+        }
+
+        .setting-group h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #1a1a1a;
+        }
+
+        .setting-item {
+            margin-bottom: 12px;
+        }
+
+        .setting-item label {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 6px;
+            color: #666;
+        }
+
+        .setting-item input[type="text"],
+        .setting-item select,
+        .setting-item input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+
+        .btn-primary {
+            background: #165DFF;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #0f4cd0;
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e5e5;
+        }
+
+        /* 主题卡片 */
+        .theme-card {
+            border-radius: 8px;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .theme-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-card.active {
+            border-color: #165DFF !important;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .toolbar {
+            background: #fff;
+            border-bottom: 1px solid #e5e5e5;
+            padding: 12px 20px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .editor-container {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .editor-pane {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #e5e5e5;
+        }
+
+        .pane-header {
+            padding: 12px 20px;
+            background: #fafafa;
+            border-bottom: 1px solid #e5e5e5;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        #markdown-editor {
+            flex: 1;
+            padding: 20px;
+            border: none;
+            resize: none;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            background: #fff;
+            outline: none;
+        }
+
+        .preview-pane {
+            flex: 1;
+            overflow-y: auto;
+            background: #fff;
+        }
+
+        #preview-content {
+            max-width: 677px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            line-height: 1.8;
+            font-size: 16px;
+            color: #333;
+        }
+
+        /* 微信预览样式 */
+        #preview-content h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 32px 0 16px;
+            color: #1a1a1a;
+            border-bottom: 2px solid #165DFF;
+            padding-bottom: 8px;
+        }
+
+        #preview-content h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 28px 0 14px;
+            color: #1a1a1a;
+        }
+
+        #preview-content h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 24px 0 12px;
+            color: #1a1a1a;
+        }
+
+        #preview-content p {
+            margin: 16px 0;
+            line-height: 1.8;
+        }
+
+        #preview-content blockquote {
+            margin: 16px 0;
+            padding: 12px 16px;
+            background: #f5f7fa;
+            border-left: 4px solid #165DFF;
+            color: #666;
+        }
+
+        #preview-content ul,
+        #preview-content ol {
+            margin: 16px 0;
+            padding-left: 24px;
+        }
+
+        #preview-content li {
+            margin: 8px 0;
+            line-height: 1.8;
+        }
+
+        #preview-content li ul,
+        #preview-content li ol {
+            margin: 8px 0;
+        }
+
+        /* 任务列表 */
+        #preview-content .task-list-item {
+            list-style: none;
+        }
+
+        #preview-content .task-list-item input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        /* 下标、上标 */
+        #preview-content sub,
+        #preview-content sup {
+            font-size: 12px;
+            line-height: 0;
+        }
+
+        /* 脚注 */
+        #preview-content .footnotes {
+            font-size: 14px;
+            color: #999;
+            margin-top: 32px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e5e5;
+        }
+
+        #preview-content .footnotes hr {
+            display: none;
+        }
+
+        #preview-content .footnote-ref {
+            font-size: 12px;
+            vertical-align: super;
+            margin-left: 2px;
+        }
+
+        #preview-content table {
+            width: 100%;
+            margin: 16px 0;
+            border-collapse: collapse;
+            border: 1px solid #e5e5e5;
+        }
+
+        #preview-content th,
+        #preview-content td {
+            padding: 10px;
+            border: 1px solid #e5e5e5;
+            text-align: left;
+        }
+
+        #preview-content th {
+            background: #f5f7fa;
+            font-weight: 600;
+        }
+
+        #preview-content code {
+            background: #f5f7fa;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 14px;
+        }
+
+        #preview-content pre {
+            margin: 16px 0;
+            padding: 16px;
+            background: #1e1e1e;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        #preview-content pre code {
+            background: none;
+            color: #d4d4d4;
+            padding: 0;
+        }
+
+        #preview-content img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin: 16px 0;
+        }
+
+        #preview-content a {
+            color: #165DFF;
+            text-decoration: none;
+        }
+
+        #preview-content .footnote {
+            font-size: 14px;
+            color: #999;
+            margin-top: 32px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e5e5;
+        }
+
+        /* 模态框 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .modal-body {
+            margin-bottom: 24px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* 响应式 */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 240px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h1>Markdown to WeChat</h1>
+            </div>
+            
+            <div class="sidebar-tabs">
+                <button class="tab-btn active" data-tab="drafts">草稿</button>
+                <button class="tab-btn" data-tab="settings">设置</button>
+            </div>
+
+            <div class="sidebar-content">
+                <!-- 草稿列表 -->
+                <div id="drafts-tab" class="tab-content">
+                    <button class="add-draft-btn" onclick="createNewDraft()">+ 新建草稿</button>
+                    <div id="draft-list"></div>
+                </div>
+
+                <!-- 设置面板 -->
+                <div id="settings-tab" class="tab-content" style="display: none;">
+                    <div class="setting-group">
+                        <h3>通用设置</h3>
+                        <div class="setting-item">
+                            <label>主题选择</label>
+                            <div id="theme-cards" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px;">
+                                <div class="theme-card" data-theme="default" style="border: 2px solid #165DFF;">
+                                    <div class="theme-preview" style="padding: 12px; border-radius: 6px 6px 0 0; background: #ffffff;">
+                                        <div style="height: 8px; background: #165DFF; border-radius: 4px; margin-bottom: 6px; width: 60%;"></div>
+                                        <div style="height: 6px; background: #e5e5e5; border-radius: 3px; margin-bottom: 4px;"></div>
+                                        <div style="height: 6px; background: #e5e5e5; border-radius: 3px; margin-bottom: 4px; width: 80%;"></div>
+                                        <div style="height: 12px; background: #f5f7fa; border-radius: 3px; margin-top: 6px; border-left: 3px solid #165DFF;"></div>
+                                    </div>
+                                    <div class="theme-name" style="padding: 6px; text-align: center; font-size: 12px; background: #f5f7fa; border-radius: 0 0 6px 6px;">默认</div>
+                                </div>
+                                <div class="theme-card" data-theme="ocean" style="border: 2px solid transparent;">
+                                    <div class="theme-preview" style="padding: 12px; border-radius: 6px 6px 0 0; background: #f0f8ff;">
+                                        <div style="height: 8px; background: #0e7490; border-radius: 4px; margin-bottom: 6px; width: 60%;"></div>
+                                        <div style="height: 6px; background: #bae6fd; border-radius: 3px; margin-bottom: 4px;"></div>
+                                        <div style="height: 6px; background: #bae6fd; border-radius: 3px; margin-bottom: 4px; width: 80%;"></div>
+                                        <div style="height: 12px; background: #e0f2fe; border-radius: 3px; margin-top: 6px; border-left: 3px solid #0e7490;"></div>
+                                    </div>
+                                    <div class="theme-name" style="padding: 6px; text-align: center; font-size: 12px; background: #f5f7fa; border-radius: 0 0 6px 6px;">海洋蓝</div>
+                                </div>
+                                <div class="theme-card" data-theme="forest" style="border: 2px solid transparent;">
+                                    <div class="theme-preview" style="padding: 12px; border-radius: 6px 6px 0 0; background: #f0fdf4;">
+                                        <div style="height: 8px; background: #15803d; border-radius: 4px; margin-bottom: 6px; width: 60%;"></div>
+                                        <div style="height: 6px; background: #bbf7d0; border-radius: 3px; margin-bottom: 4px;"></div>
+                                        <div style="height: 6px; background: #bbf7d0; border-radius: 3px; margin-bottom: 4px; width: 80%;"></div>
+                                        <div style="height: 12px; background: #dcfce7; border-radius: 3px; margin-top: 6px; border-left: 3px solid #15803d;"></div>
+                                    </div>
+                                    <div class="theme-name" style="padding: 6px; text-align: center; font-size: 12px; background: #f5f7fa; border-radius: 0 0 6px 6px;">森林绿</div>
+                                </div>
+                                <div class="theme-card" data-theme="sunset" style="border: 2px solid transparent;">
+                                    <div class="theme-preview" style="padding: 12px; border-radius: 6px 6px 0 0; background: #fff7ed;">
+                                        <div style="height: 8px; background: #c2410c; border-radius: 4px; margin-bottom: 6px; width: 60%;"></div>
+                                        <div style="height: 6px; background: #fed7aa; border-radius: 3px; margin-bottom: 4px;"></div>
+                                        <div style="height: 6px; background: #fed7aa; border-radius: 3px; margin-bottom: 4px; width: 80%;"></div>
+                                        <div style="height: 12px; background: #ffedd5; border-radius: 3px; margin-top: 6px; border-left: 3px solid #c2410c;"></div>
+                                    </div>
+                                    <div class="theme-name" style="padding: 6px; text-align: center; font-size: 12px; background: #f5f7fa; border-radius: 0 0 6px 6px;">日落橙</div>
+                                </div>
+                                <div class="theme-card" data-theme="lavender" style="border: 2px solid transparent;">
+                                    <div class="theme-preview" style="padding: 12px; border-radius: 6px 6px 0 0; background: #faf5ff;">
+                                        <div style="height: 8px; background: #7e22ce; border-radius: 4px; margin-bottom: 6px; width: 60%;"></div>
+                                        <div style="height: 6px; background: #e9d5ff; border-radius: 3px; margin-bottom: 4px;"></div>
+                                        <div style="height: 6px; background: #e9d5ff; border-radius: 3px; margin-bottom: 4px; width: 80%;"></div>
+                                        <div style="height: 12px; background: #f3e8ff; border-radius: 3px; margin-top: 6px; border-left: 3px solid #7e22ce;"></div>
+                                    </div>
+                                    <div class="theme-name" style="padding: 6px; text-align: center; font-size: 12px; background: #f5f7fa; border-radius: 0 0 6px 6px;">薰衣草</div>
+                                </div>
+                                <div class="theme-card" data-theme="dark" style="border: 2px solid transparent;">
+                                    <div class="theme-preview" style="padding: 12px; border-radius: 6px 6px 0 0; background: #1e1e1e;">
+                                        <div style="height: 8px; background: #d4d4d4; border-radius: 4px; margin-bottom: 6px; width: 60%;"></div>
+                                        <div style="height: 6px; background: #525252; border-radius: 3px; margin-bottom: 4px;"></div>
+                                        <div style="height: 6px; background: #525252; border-radius: 3px; margin-bottom: 4px; width: 80%;"></div>
+                                        <div style="height: 12px; background: #404040; border-radius: 3px; margin-top: 6px; border-left: 3px solid #d4d4d4;"></div>
+                                    </div>
+                                    <div class="theme-name" style="padding: 6px; text-align: center; font-size: 12px; background: #f5f7fa; border-radius: 0 0 6px 6px;">深色</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <label>字体大小 (px)</label>
+                            <input type="number" id="font-size" value="16" min="12" max="24">
+                        </div>
+                        <div class="setting-item">
+                            <label>行高</label>
+                            <input type="number" id="line-height" value="1.8" min="1.2" max="3" step="0.1">
+                        </div>
+                    </div>
+
+                    <div class="setting-group">
+                        <h3>图片设置</h3>
+                        <div class="setting-item">
+                            <label>图片圆角 (px)</label>
+                            <input type="number" id="image-radius" value="8" min="0" max="100">
+                        </div>
+                        <div class="setting-item">
+                            <label>上下间距 (px)</label>
+                            <input type="number" id="image-spacing" value="16" min="0" max="100">
+                        </div>
+                        <div class="setting-item">
+                            <label>显示图注</label>
+                            <select id="show-caption">
+                                <option value="true">是</option>
+                                <option value="false">否</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label>图注样式</label>
+                            <select id="caption-style">
+                                <option value="normal">普通</option>
+                                <option value="bordered">带边框</option>
+                                <option value="background">背景色</option>
+                                <option value="bold">加粗</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label style="display: flex; align-items: center; justify-content: space-between;">
+                                <span>图片边框</span>
+                                <input type="checkbox" id="image-border" style="width: auto;">
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label style="display: flex; align-items: center; justify-content: space-between;">
+                                <span>图片阴影</span>
+                                <input type="checkbox" id="image-shadow" style="width: auto;">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="setting-group">
+                        <h3>配置管理</h3>
+                        <button class="btn btn-primary" onclick="exportConfig()">导出配置</button>
+                        <button class="btn btn-secondary" onclick="importConfig()">导入配置</button>
+                        <button class="btn btn-secondary" onclick="resetConfig()">恢复默认</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <div class="toolbar">
+                <button class="btn btn-primary" onclick="formatMarkdown()">格式化 Markdown</button>
+                <button class="btn btn-primary" onclick="copyToClipboard()">复制到剪贴板</button>
+                <button class="btn btn-secondary" onclick="exportHTML()">导出 HTML</button>
+                <button class="btn btn-secondary" onclick="showPublishReport()">发布报告</button>
+            </div>
+
+            <div class="editor-container">
+                <div class="editor-pane">
+                    <div class="pane-header">Markdown 编辑</div>
+                    <textarea id="markdown-editor" placeholder="在这里输入 Markdown 内容..."></textarea>
+                </div>
+                <div class="preview-pane">
+                    <div class="pane-header">微信预览</div>
+                    <div id="preview-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新建草稿模态框 -->
+    <div id="new-draft-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title">新建草稿</div>
+            <div class="modal-body">
+                <div class="setting-item">
+                    <label>草稿标题</label>
+                    <input type="text" id="new-draft-title" placeholder="请输入草稿标题">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('new-draft-modal')">取消</button>
+                <button class="btn btn-primary" onclick="confirmCreateDraft()">创建</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 重命名草稿模态框 -->
+    <div id="rename-draft-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title">重命名草稿</div>
+            <div class="modal-body">
+                <div class="setting-item">
+                    <label>新标题</label>
+                    <input type="text" id="rename-draft-title" placeholder="请输入新标题">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('rename-draft-modal')">取消</button>
+                <button class="btn btn-primary" onclick="confirmRenameDraft()">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 发布报告模态框 -->
+    <div id="publish-report-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-title">发布前检查报告</div>
+            <div class="modal-body" id="publish-report-content"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('publish-report-modal')">关闭</button>
+                <button class="btn btn-primary" onclick="copyToClipboard()">复制内容</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导入配置文件选择器 -->
+    <input type="file" id="config-file-input" accept=".json" style="display: none;" onchange="handleConfigFileImport(event)">
+
+    <script>
+        // 微信安全样式白名单
+        const allowedStyles = new Set([
+            // 基础样式
+            'color', 'background', 'background-color', 'opacity',
+            // 盒模型
+            'width', 'height', 'margin', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
+            'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
+            'border', 'border-width', 'border-style', 'border-color',
+            'border-top', 'border-right', 'border-bottom', 'border-left',
+            'border-radius', 'border-top-left-radius', 'border-top-right-radius', 'border-bottom-left-radius', 'border-bottom-right-radius',
+            // 文本
+            'font-size', 'font-family', 'font-weight', 'font-style', 'line-height', 'text-align',
+            'text-decoration', 'text-indent', 'letter-spacing', 'white-space', 'word-break', 'word-wrap',
+            // 布局
+            'display', 'float', 'clear', 'overflow', 'vertical-align',
+            // 列表
+            'list-style', 'list-style-type', 'list-style-position',
+            // 表格
+            'border-collapse', 'border-spacing', 'text-align', 'vertical-align',
+            // 其他
+            'max-width', 'min-width', 'max-height', 'min-height'
+        ]);
+
+        // 禁止的属性值关键词
+        const forbiddenValues = [
+            'fixed', 'sticky', 'absolute', 'transform', 'translate', 'rotate', 'scale',
+            'animation', 'transition', 'position', 'z-index', 'filter', 'backdrop-filter',
+            'grid', 'flex', 'gap', 'justify-content', 'align-items', 'box-shadow'
+        ];
+
+        // 主题配置
+        const themes = {
+            default: {
+                primary: '#165DFF',
+                background: '#ffffff',
+                text: '#333333',
+                lightText: '#666666',
+                lightBg: '#f5f7fa',
+                codeBg: '#1e1e1e',
+                codeText: '#d4d4d4'
+            },
+            ocean: {
+                primary: '#0e7490',
+                background: '#f0f8ff',
+                text: '#1e3a5f',
+                lightText: '#475569',
+                lightBg: '#e0f2fe',
+                codeBg: '#0c4a6e',
+                codeText: '#e0f2fe'
+            },
+            forest: {
+                primary: '#15803d',
+                background: '#f0fdf4',
+                text: '#166534',
+                lightText: '#475569',
+                lightBg: '#dcfce7',
+                codeBg: '#052e16',
+                codeText: '#dcfce7'
+            },
+            sunset: {
+                primary: '#c2410c',
+                background: '#fff7ed',
+                text: '#7c2d12',
+                lightText: '#7c2d12',
+                lightBg: '#ffedd5',
+                codeBg: '#431407',
+                codeText: '#fed7aa'
+            },
+            lavender: {
+                primary: '#7e22ce',
+                background: '#faf5ff',
+                text: '#581c87',
+                lightText: '#6b21a8',
+                lightBg: '#f3e8ff',
+                codeBg: '#3b0764',
+                codeText: '#e9d5ff'
+            },
+            dark: {
+                primary: '#d4d4d4',
+                background: '#1e1e1e',
+                text: '#e5e5e5',
+                lightText: '#a3a3a3',
+                lightBg: '#404040',
+                codeBg: '#2e2e2e',
+                codeText: '#e5e5e5'
+            }
+        };
+
+        // 全局状态
+        let currentDraftId = null;
+        let drafts = [];
+        let config = {
+            theme: 'default',
+            fontSize: 16,
+            lineHeight: 1.8,
+            imageRadius: 8,
+            imageSpacing: 16,
+            showCaption: true,
+            captionStyle: 'normal',
+            imageBorder: false,
+            imageShadow: false
+        };
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDrafts();
+            loadConfig();
+            initTabs();
+            initEditor();
+            initThemeCards();
+            
+            // 如果没有草稿，创建一个默认草稿
+            if (drafts.length === 0) {
+                createNewDraft('未命名文章');
+            } else {
+                switchDraft(drafts[0].id);
+            }
+        });
+
+        // 初始化主题卡片
+        function initThemeCards() {
+            document.querySelectorAll('.theme-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const theme = this.dataset.theme;
+                    config.theme = theme;
+                    saveConfig();
+                });
+            });
+        }
+
+        // 初始化标签切换
+        function initTabs() {
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tab = this.dataset.tab;
+                    
+                    // 切换按钮状态
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 切换内容
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.style.display = 'none';
+                    });
+                    document.getElementById(`${tab}-tab`).style.display = 'block';
+                });
+            });
+        }
+
+        // 初始化编辑器
+        function initEditor() {
+            const editor = document.getElementById('markdown-editor');
+            editor.addEventListener('input', debounce(function() {
+                saveCurrentDraft();
+                renderPreview();
+            }, 500));
+        }
+
+        // 草稿管理
+        function loadDrafts() {
+            const saved = localStorage.getItem('md2wechat_drafts');
+            if (saved) {
+                drafts = JSON.parse(saved);
+            }
+            renderDraftList();
+        }
+
+        function saveDrafts() {
+            localStorage.setItem('md2wechat_drafts', JSON.stringify(drafts));
+            renderDraftList();
+        }
+
+        function renderDraftList() {
+            const listEl = document.getElementById('draft-list');
+            listEl.innerHTML = '';
+            
+            // 按更新时间排序，最新的在前面
+            const sortedDrafts = [...drafts].sort((a, b) => b.updatedAt - a.updatedAt);
+            
+            sortedDrafts.forEach(draft => {
+                const item = document.createElement('div');
+                item.className = `draft-item ${draft.id === currentDraftId ? 'active' : ''}`;
+                item.innerHTML = `
+                    <div class="draft-title" onclick="switchDraft('${draft.id}')">${escapeHtml(draft.title)}</div>
+                    <div class="draft-meta">${formatDate(draft.updatedAt)}</div>
+                    <div class="draft-actions">
+                        <button class="draft-action-btn" onclick="showRenameModal('${draft.id}')">重命名</button>
+                        <button class="draft-action-btn" onclick="duplicateDraft('${draft.id}')">复制</button>
+                        <button class="draft-action-btn" onclick="deleteDraft('${draft.id}')">删除</button>
+                    </div>
+                `;
+                listEl.appendChild(item);
+            });
+        }
+
+        function createNewDraft(title = null) {
+            if (!title) {
+                document.getElementById('new-draft-title').value = '';
+                openModal('new-draft-modal');
+                return;
+            }
+            
+            const draft = {
+                id: Date.now().toString(),
+                title: title,
+                content: '',
+                createdAt: Date.now(),
+                updatedAt: Date.now()
+            };
+            
+            drafts.unshift(draft);
+            saveDrafts();
+            switchDraft(draft.id);
+            closeModal('new-draft-modal');
+        }
+
+        function confirmCreateDraft() {
+            const title = document.getElementById('new-draft-title').value.trim() || '未命名文章';
+            createNewDraft(title);
+        }
+
+        function switchDraft(draftId) {
+            const draft = drafts.find(d => d.id === draftId);
+            if (!draft) return;
+            
+            // 保存当前草稿
+            saveCurrentDraft();
+            
+            currentDraftId = draftId;
+            document.getElementById('markdown-editor').value = draft.content;
+            renderDraftList();
+            renderPreview();
+        }
+
+        function saveCurrentDraft() {
+            if (!currentDraftId) return;
+            
+            const draft = drafts.find(d => d.id === currentDraftId);
+            if (!draft) return;
+            
+            const content = document.getElementById('markdown-editor').value;
+            if (content === draft.content) return;
+            
+            draft.content = content;
+            draft.updatedAt = Date.now();
+            
+            // 自动提取标题（第一行#开头的内容）
+            const lines = content.split('\n');
+            const firstLine = lines[0] || '';
+            if (firstLine.startsWith('# ') && draft.title === '未命名文章') {
+                draft.title = firstLine.replace(/^#\s+/, '').trim();
+            }
+            
+            saveDrafts();
+        }
+
+        function showRenameModal(draftId) {
+            const draft = drafts.find(d => d.id === draftId);
+            if (!draft) return;
+            
+            document.getElementById('rename-draft-title').value = draft.title;
+            window.renameDraftId = draftId;
+            openModal('rename-draft-modal');
+        }
+
+        function confirmRenameDraft() {
+            const newTitle = document.getElementById('rename-draft-title').value.trim() || '未命名文章';
+            const draft = drafts.find(d => d.id === window.renameDraftId);
+            if (draft) {
+                draft.title = newTitle;
+                draft.updatedAt = Date.now();
+                saveDrafts();
+            }
+            closeModal('rename-draft-modal');
+        }
+
+        function duplicateDraft(draftId) {
+            const draft = drafts.find(d => d.id === draftId);
+            if (!draft) return;
+            
+            const newDraft = {
+                id: Date.now().toString(),
+                title: `${draft.title} - 副本`,
+                content: draft.content,
+                createdAt: Date.now(),
+                updatedAt: Date.now()
+            };
+            
+            drafts.unshift(newDraft);
+            saveDrafts();
+            switchDraft(newDraft.id);
+        }
+
+        function deleteDraft(draftId) {
+            if (drafts.length <= 1) {
+                alert('至少保留一个草稿');
+                return;
+            }
+            
+            if (!confirm('确定要删除这个草稿吗？删除后无法恢复。')) {
+                return;
+            }
+            
+            const index = drafts.findIndex(d => d.id === draftId);
+            if (index === -1) return;
+            
+            drafts.splice(index, 1);
+            saveDrafts();
+            
+            // 如果删除的是当前草稿，切换到第一个草稿
+            if (draftId === currentDraftId) {
+                switchDraft(drafts[0].id);
+            }
+        }
+
+        // Markdown 格式化
+        function formatMarkdown() {
+            const content = document.getElementById('markdown-editor').value;
+            if (!content) return;
+            
+            const lines = content.split('\n');
+            const formatted = [];
+            let inCodeBlock = false;
+            let lastLineEmpty = false;
+            
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i].trimEnd();
+                
+                // 处理代码块
+                if (line.startsWith('```')) {
+                    inCodeBlock = !inCodeBlock;
+                    formatted.push(line);
+                    lastLineEmpty = false;
+                    continue;
+                }
+                
+                if (inCodeBlock) {
+                    formatted.push(line);
+                    lastLineEmpty = false;
+                    continue;
+                }
+                
+                // 处理空行
+                if (line.trim() === '') {
+                    if (!lastLineEmpty) {
+                        formatted.push('');
+                        lastLineEmpty = true;
+                    }
+                    continue;
+                }
+                
+                // 处理标题
+                const headingMatch = line.match(/^(#{1,6})\s*(.*)/);
+                if (headingMatch) {
+                    // 标题前后加空行
+                    if (formatted.length > 0 && formatted[formatted.length - 1] !== '') {
+                        formatted.push('');
+                    }
+                    formatted.push(`${headingMatch[1]} ${headingMatch[2].trim()}`);
+                    lastLineEmpty = false;
+                    continue;
+                }
+                
+                // 处理列表
+                const listMatch = line.match(/^([\-\*\+]|\d+\.)\s*(.*)/);
+                if (listMatch) {
+                    formatted.push(`${listMatch[1]} ${listMatch[2].trim()}`);
+                    lastLineEmpty = false;
+                    continue;
+                }
+                
+                // 处理引用
+                const quoteMatch = line.match(/^(>+)\s*(.*)/);
+                if (quoteMatch) {
+                    formatted.push(`${quoteMatch[1]} ${quoteMatch[2].trim()}`);
+                    lastLineEmpty = false;
+                    continue;
+                }
+                
+                // 普通段落，清理多余空格
+                formatted.push(line.replace(/\s+/g, ' '));
+                lastLineEmpty = false;
+            }
+            
+            // 清理末尾多余空行
+            while (formatted.length > 0 && formatted[formatted.length - 1].trim() === '') {
+                formatted.pop();
+            }
+            
+            document.getElementById('markdown-editor').value = formatted.join('\n');
+            saveCurrentDraft();
+            renderPreview();
+            alert('格式化完成');
+        }
+
+        // 配置管理
+        function loadConfig() {
+            const saved = localStorage.getItem('md2wechat_config');
+            if (saved) {
+                config = { ...config, ...JSON.parse(saved) };
+            }
+            
+            // 同步到表单
+            document.getElementById('font-size').value = config.fontSize;
+            document.getElementById('line-height').value = config.lineHeight;
+            document.getElementById('image-radius').value = config.imageRadius;
+            document.getElementById('image-spacing').value = config.imageSpacing;
+            document.getElementById('show-caption').value = config.showCaption.toString();
+            document.getElementById('caption-style').value = config.captionStyle;
+            document.getElementById('image-border').checked = config.imageBorder;
+            document.getElementById('image-shadow').checked = config.imageShadow;
+            
+            applyConfig();
+        }
+
+        function saveConfig() {
+            localStorage.setItem('md2wechat_config', JSON.stringify(config));
+            applyConfig();
+        }
+
+        // 监听配置表单变化
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('font-size').addEventListener('change', function() {
+                config.fontSize = parseInt(this.value);
+                saveConfig();
+            });
+
+            document.getElementById('line-height').addEventListener('change', function() {
+                config.lineHeight = parseFloat(this.value);
+                saveConfig();
+            });
+
+            document.getElementById('image-radius').addEventListener('change', function() {
+                config.imageRadius = parseInt(this.value);
+                saveConfig();
+            });
+
+            document.getElementById('image-spacing').addEventListener('change', function() {
+                config.imageSpacing = parseInt(this.value);
+                saveConfig();
+            });
+
+            document.getElementById('show-caption').addEventListener('change', function() {
+                config.showCaption = this.value === 'true';
+                saveConfig();
+            });
+
+            document.getElementById('caption-style').addEventListener('change', function() {
+                config.captionStyle = this.value;
+                saveConfig();
+            });
+
+            document.getElementById('image-border').addEventListener('change', function() {
+                config.imageBorder = this.checked;
+                saveConfig();
+            });
+
+            document.getElementById('image-shadow').addEventListener('change', function() {
+                config.imageShadow = this.checked;
+                saveConfig();
+            });
+        });
+
+        function applyConfig() {
+            const previewEl = document.getElementById('preview-content');
+            const theme = themes[config.theme];
+            
+            // 基础样式
+            previewEl.style.fontSize = `${config.fontSize}px`;
+            previewEl.style.lineHeight = config.lineHeight;
+            previewEl.style.backgroundColor = theme.background;
+            previewEl.style.color = theme.text;
+            
+            // 动态注入主题样式
+            let styleEl = document.getElementById('theme-style');
+            if (!styleEl) {
+                styleEl = document.createElement('style');
+                styleEl.id = 'theme-style';
+                document.head.appendChild(styleEl);
+            }
+            
+            styleEl.textContent = `
+                #preview-content h1,
+                #preview-content h2,
+                #preview-content h3,
+                #preview-content h4,
+                #preview-content h5,
+                #preview-content h6 {
+                    color: ${theme.text};
+                }
+                
+                #preview-content h1 {
+                    border-bottom-color: ${theme.primary};
+                }
+                
+                #preview-content blockquote {
+                    background: ${theme.lightBg};
+                    border-left-color: ${theme.primary};
+                    color: ${theme.lightText};
+                }
+                
+                #preview-content th {
+                    background: ${theme.lightBg};
+                }
+                
+                #preview-content th,
+                #preview-content td {
+                    border-color: rgba(0, 0, 0, 0.1);
+                }
+                
+                #preview-content code {
+                    background: ${theme.lightBg};
+                }
+                
+                #preview-content pre {
+                    background: ${theme.codeBg};
+                }
+                
+                #preview-content pre code {
+                    color: ${theme.codeText};
+                }
+                
+                #preview-content a {
+                    color: ${theme.primary};
+                }
+                
+                #preview-content .footnotes {
+                    color: ${theme.lightText};
+                    border-top-color: rgba(0, 0, 0, 0.1);
+                }
+            `;
+            
+            // 图片样式
+            const images = previewEl.querySelectorAll('img');
+            images.forEach(img => {
+                img.style.borderRadius = `${config.imageRadius}px`;
+                img.style.marginTop = `${config.imageSpacing}px`;
+                img.style.marginBottom = `${config.imageSpacing}px`;
+                
+                if (config.imageBorder) {
+                    img.style.border = '1px solid rgba(0, 0, 0, 0.1)';
+                } else {
+                    img.style.border = 'none';
+                }
+                
+                if (config.imageShadow) {
+                    img.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+                } else {
+                    img.style.boxShadow = 'none';
+                }
+            });
+            
+            // 图注样式
+            const captions = previewEl.querySelectorAll('div[style*="text-align: center"]');
+            captions.forEach(caption => {
+                // 重置样式
+                caption.style.border = 'none';
+                caption.style.background = 'none';
+                caption.style.padding = '0';
+                caption.style.marginTop = `-${config.imageSpacing / 2}px`;
+                caption.style.marginBottom = `${config.imageSpacing}px`;
+                caption.style.fontWeight = 'normal';
+                
+                // 应用选中的样式
+                switch (config.captionStyle) {
+                    case 'bordered':
+                        caption.style.borderBottom = '2px solid rgba(0, 0, 0, 0.1)';
+                        caption.style.paddingBottom = '8px';
+                        break;
+                    case 'background':
+                        caption.style.background = theme.lightBg;
+                        caption.style.padding = '8px 12px';
+                        caption.style.borderRadius = '4px';
+                        break;
+                    case 'bold':
+                        caption.style.fontWeight = '600';
+                        break;
+                }
+            });
+            
+            // 更新主题卡片选中状态
+            document.querySelectorAll('.theme-card').forEach(card => {
+                if (card.dataset.theme === config.theme) {
+                    card.classList.add('active');
+                } else {
+                    card.classList.remove('active');
+                }
+            });
+            
+            renderPreview();
+        }
+
+        function exportConfig() {
+            const dataStr = JSON.stringify(config, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `md2wechat-config-${formatDate(Date.now(), 'filename')}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+
+        function importConfig() {
+            document.getElementById('config-file-input').click();
+        }
+
+        function handleConfigFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedConfig = JSON.parse(e.target.result);
+                    config = { ...config, ...importedConfig };
+                    saveConfig();
+                    loadConfig(); // 同步到表单
+                    alert('配置导入成功');
+                } catch (err) {
+                    alert('配置文件格式错误');
+                }
+            };
+            reader.readAsText(file);
+            
+            // 清空文件输入
+            event.target.value = '';
+        }
+
+        function resetConfig() {
+            if (!confirm('确定要恢复默认配置吗？')) return;
+            
+            config = {
+                theme: 'default',
+                fontSize: 16,
+                lineHeight: 1.8,
+                imageRadius: 8,
+                showCaption: true
+            };
+            saveConfig();
+            loadConfig();
+            alert('配置已恢复默认');
+        }
+
+        // 监听配置表单变化
+
+        document.getElementById('font-size').addEventListener('change', function() {
+            config.fontSize = parseInt(this.value);
+            saveConfig();
+        });
+
+        document.getElementById('line-height').addEventListener('change', function() {
+            config.lineHeight = parseFloat(this.value);
+            saveConfig();
+        });
+
+        document.getElementById('image-radius').addEventListener('change', function() {
+            config.imageRadius = parseInt(this.value);
+            saveConfig();
+        });
+
+        document.getElementById('show-caption').addEventListener('change', function() {
+            config.showCaption = this.value === 'true';
+            saveConfig();
+        });
+
+        // 初始化 markdown-it
+        const md = window.markdownit({
+            html: true, // 允许 HTML 混排
+            breaks: true, // 换行转为 <br>
+            linkify: true, // 自动识别链接
+            typographer: true // 智能排版
+        })
+        .use(window.markdownitFootnote) // 脚注支持
+        .use(window.markdownitTaskLists) // 任务列表
+        .use(window.markdownitSub) // 下标
+        .use(window.markdownitSup) // 上标
+        .use(window.markdownitAbbr); // 缩写
+
+        // Markdown 渲染
+        function renderPreview() {
+            const content = document.getElementById('markdown-editor').value;
+            const previewEl = document.getElementById('preview-content');
+            
+            // 用 markdown-it 渲染
+            let html = md.render(content);
+            
+            // 应用自定义样式
+            previewEl.innerHTML = html;
+            
+            // 应用图片样式
+            const images = previewEl.querySelectorAll('img');
+            images.forEach(img => {
+                img.style.borderRadius = `${config.imageRadius}px`;
+                // 图注处理
+                if (config.showCaption && img.alt) {
+                    const caption = document.createElement('div');
+                    caption.style.textAlign = 'center';
+                    caption.style.fontSize = '14px';
+                    caption.style.color = '#999';
+                    caption.style.marginTop = '-8px';
+                    caption.style.marginBottom = '16px';
+                    caption.textContent = img.alt;
+                    img.parentNode.insertBefore(caption, img.nextSibling);
+                }
+            });
+            
+            // 任务列表样式
+            const taskLists = previewEl.querySelectorAll('.task-list-item');
+            taskLists.forEach(item => {
+                item.style.listStyle = 'none';
+                item.style.marginLeft = '-24px';
+                const checkbox = item.querySelector('input[type="checkbox"]');
+                if (checkbox) {
+                    checkbox.style.marginRight = '8px';
+                    checkbox.disabled = true;
+                }
+            });
+            
+            // 脚注样式
+            const footnotes = previewEl.querySelectorAll('.footnotes');
+            footnotes.forEach(fn => {
+                fn.classList.add('footnote');
+            });
+        }
+
+        // 全局变量存储调试用的 HTML
+        let debugSafeHtml = '';
+
+        // 发布报告
+        function showPublishReport() {
+            const content = document.getElementById('markdown-editor').value;
+            const previewEl = document.getElementById('preview-content');
+            
+            // 生成安全 HTML 用于统计
+            const temp = document.createElement('div');
+            temp.innerHTML = previewEl.innerHTML;
+            sanitizeStyles(temp);
+            const safeHtml = temp.innerHTML
+                .replace(/<script[^>]*>[\s\S]*?<\/script>/gim, '')
+                .replace(/on\w+\s*=\s*"[^"]*"/g, '')
+                .replace(/javascript\s*:/gi, '');
+            debugSafeHtml = safeHtml;
+            
+            // 统计信息
+            const stats = {
+                words: previewEl.textContent.replace(/\s/g, '').length,
+                readingTime: Math.ceil(previewEl.textContent.length / 500),
+                headings: previewEl.querySelectorAll('h1, h2, h3, h4, h5, h6').length,
+                images: previewEl.querySelectorAll('img').length,
+                links: previewEl.querySelectorAll('a').length,
+                codeBlocks: previewEl.querySelectorAll('pre').length,
+                tables: previewEl.querySelectorAll('table').length,
+                footnotes: previewEl.querySelectorAll('.footnote-ref').length,
+                elements: previewEl.querySelectorAll('*').length,
+                styleProps: (previewEl.innerHTML.match(/style=\"([^\"]*)\"/g) || []).length,
+                htmlSize: (safeHtml.length / 1024).toFixed(2)
+            };
+            
+            const risks = [];
+            
+            // 本地图片检测
+            const localImages = content.match(/src=\"file:\/\//g) || [];
+            if (localImages.length > 0) {
+                risks.push({ level: 'error', text: `检测到 ${localImages.length} 张本地图片，发布后无法显示` });
+            }
+            
+            // 不安全样式检测
+            let unsafeStyleCount = 0;
+            const styleMatches = content.match(/style=\"([^\"]*)\"/g) || [];
+            styleMatches.forEach(style => {
+                for (const forbidden of forbiddenValues) {
+                    if (style.toLowerCase().includes(forbidden)) {
+                        unsafeStyleCount++;
+                        break;
+                    }
+                }
+            });
+            if (unsafeStyleCount > 0) {
+                risks.push({ level: 'warning', text: `检测到 ${unsafeStyleCount} 处不兼容样式，复制时会自动过滤` });
+            }
+            
+            // 内容建议
+            if (stats.images === 0) {
+                risks.push({ level: 'info', text: '文章没有图片，建议添加配图提升阅读体验' });
+            }
+            if (stats.words > 5000) {
+                risks.push({ level: 'info', text: '文章较长（超过5000字），建议分段发布' });
+            }
+            
+            const reportEl = document.getElementById('publish-report-content');
+            reportEl.innerHTML = `
+                <div style="margin-bottom: 24px;">
+                    <h4 style="margin-bottom: 16px; font-size: 16px;">📊 内容统计</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div style="padding: 12px; background: #f5f7fa; border-radius: 8px;">
+                            <div style="font-size: 12px; color: #999; margin-bottom: 4px;">字数</div>
+                            <div style="font-size: 20px; font-weight: 600;">${stats.words}</div>
+                        </div>
+                        <div style="padding: 12px; background: #f5f7fa; border-radius: 8px;">
+                            <div style="font-size: 12px; color: #999; margin-bottom: 4px;">阅读时间</div>
+                            <div style="font-size: 20px; font-weight: 600;">${stats.readingTime} 分钟</div>
+                        </div>
+                        <div style="padding: 12px; background: #f5f7fa; border-radius: 8px;">
+                            <div style="font-size: 12px; color: #999; margin-bottom: 4px;">标题</div>
+                            <div style="font-size: 20px; font-weight: 600;">${stats.headings}</div>
+                        </div>
+                        <div style="padding: 12px; background: #f5f7fa; border-radius: 8px;">
+                            <div style="font-size: 12px; color: #999; margin-bottom: 4px;">图片</div>
+                            <div style="font-size: 20px; font-weight: 600;">${stats.images}</div>
+                        </div>
+                        <div style="padding: 12px; background: #f5f7fa; border-radius: 8px;">
+                            <div style="font-size: 12px; color: #999; margin-bottom: 4px;">链接</div>
+                            <div style="font-size: 20px; font-weight: 600;">${stats.links}</div>
+                        </div>
+                        <div style="padding: 12px; background: #f5f7fa; border-radius: 8px;">
+                            <div style="font-size: 12px; color: #999; margin-bottom: 4px;">代码块</div>
+                            <div style="font-size: 20px; font-weight: 600;">${stats.codeBlocks}</div>
+                        </div>
+                        <div style="padding: 12px; background: #f5f7fa; border-radius: 8px;">
+                            <div style="font-size: 12px; color: #999; margin-bottom: 4px;">脚注</div>
+                            <div style="font-size: 20px; font-weight: 600;">${stats.footnotes}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 24px;">
+                    <h4 style="margin-bottom: 16px; font-size: 16px;">⚠️ 风险检查</h4>
+                    ${risks.length === 0 ? '<div style="padding: 12px; background: #f0f9ff; color: #165DFF; border-radius: 8px;">✅ 未检测到风险，可以发布</div>' : risks.map(risk => {
+                        let bgColor, textColor, icon;
+                        if (risk.level === 'error') {
+                            bgColor = '#fff1f0';
+                            textColor = '#f53f3f';
+                            icon = '❌';
+                        } else if (risk.level === 'warning') {
+                            bgColor = '#fff7e6';
+                            textColor = '#ff7d00';
+                            icon = '⚠️';
+                        } else {
+                            bgColor = '#f0f9ff';
+                            textColor = '#165DFF';
+                            icon = '💡';
+                        }
+                        return `<div style="padding: 12px; margin-bottom: 8px; background: ${bgColor}; color: ${textColor}; border-radius: 8px;">${icon} ${risk.text}</div>`;
+                    }).join('')}
+                </div>
+
+                <div>
+                    <h4 style="margin-bottom: 16px; font-size: 16px;">🔍 调试信息</h4>
+                    <div style="background: #f5f7fa; border-radius: 8px; padding: 16px; font-size: 12px; font-family: monospace; line-height: 1.6;">
+                        <div style="margin-bottom: 8px;"><strong>总元素数量：</strong>${stats.elements} 个</div>
+                        <div style="margin-bottom: 8px;"><strong>样式属性数量：</strong>${stats.styleProps} 个</div>
+                        <div style="margin-bottom: 8px;"><strong>过滤的不安全样式：</strong>${unsafeStyleCount} 个</div>
+                        <div style="margin-bottom: 8px;"><strong>HTML 大小：</strong>${stats.htmlSize} KB</div>
+                    </div>
+                    <button class="btn btn-secondary" style="margin-top: 12px; width: 100%;" onclick="toggleDebugHtml()">查看完整 HTML 结构</button>
+                    <textarea id="debug-html" style="display: none; width: 100%; height: 200px; margin-top: 12px; font-size: 12px; padding: 8px; border: 1px solid #e5e5e5; border-radius: 8px; font-family: monospace;" readonly></textarea>
+                </div>
+            `;
+            
+            openModal('publish-report-modal');
+        }
+
+        // 清理不安全的样式
+        function sanitizeStyles(element) {
+            // 处理当前元素
+            if (element.style) {
+                const styles = element.style;
+                const toRemove = [];
+                
+                // 收集要移除的属性
+                for (let i = 0; i < styles.length; i++) {
+                    const prop = styles[i].toLowerCase();
+                    if (!allowedStyles.has(prop)) {
+                        toRemove.push(prop);
+                    }
+                    
+                    // 检查属性值是否包含违禁关键词
+                    const value = styles.getPropertyValue(prop).toLowerCase();
+                    for (const forbidden of forbiddenValues) {
+                        if (value.includes(forbidden)) {
+                            toRemove.push(prop);
+                            break;
+                        }
+                    }
+                }
+                
+                // 移除不安全属性
+                toRemove.forEach(prop => {
+                    styles.removeProperty(prop);
+                });
+            }
+            
+            // 递归处理子元素
+            for (let i = 0; i < element.children.length; i++) {
+                sanitizeStyles(element.children[i]);
+            }
+        }
+
+        // 复制到剪贴板
+        function copyToClipboard() {
+            const previewEl = document.getElementById('preview-content');
+            
+            // 创建深拷贝
+            const temp = document.createElement('div');
+            temp.innerHTML = previewEl.innerHTML;
+            
+            // 清理不安全样式
+            sanitizeStyles(temp);
+            
+            // 移除脚本和事件
+            let safeHtml = temp.innerHTML
+                .replace(/<script[^>]*>[\s\S]*?<\/script>/gim, '') // 移除脚本
+                .replace(/on\w+\s*=\s*"[^"]*"/g, '') // 移除内联事件
+                .replace(/javascript\s*:/gi, ''); // 移除 javascript 伪协议
+            
+            temp.innerHTML = safeHtml;
+            document.body.appendChild(temp);
+            
+            // 选中并复制
+            const range = document.createRange();
+            range.selectNode(temp);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+            
+            try {
+                document.execCommand('copy');
+                alert('复制成功，可以粘贴到公众号后台了');
+            } catch (err) {
+                alert('复制失败，请手动复制');
+            }
+            
+            // 清理
+            window.getSelection().removeAllRanges();
+            document.body.removeChild(temp);
+            closeModal('publish-report-modal');
+        }
+
+        // 导出 HTML
+        function exportHTML() {
+            const previewEl = document.getElementById('preview-content');
+            const html = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>${document.querySelector('.draft-item.active .draft-title')?.textContent || '文章'}</title>
+    <style>
+        body { max-width: 677px; margin: 0 auto; padding: 40px 20px; font-size: 16px; line-height: 1.8; color: #333; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        h1 { font-size: 24px; font-weight: 600; margin: 32px 0 16px; color: #1a1a1a; border-bottom: 2px solid #165DFF; padding-bottom: 8px; }
+        h2 { font-size: 20px; font-weight: 600; margin: 28px 0 14px; color: #1a1a1a; }
+        h3 { font-size: 18px; font-weight: 600; margin: 24px 0 12px; color: #1a1a1a; }
+        p { margin: 16px 0; line-height: 1.8; }
+        blockquote { margin: 16px 0; padding: 12px 16px; background: #f5f7fa; border-left: 4px solid #165DFF; color: #666; }
+        ul, ol { margin: 16px 0; padding-left: 24px; }
+        li { margin: 8px 0; line-height: 1.8; }
+        table { width: 100%; margin: 16px 0; border-collapse: collapse; border: 1px solid #e5e5e5; }
+        th, td { padding: 10px; border: 1px solid #e5e5e5; text-align: left; }
+        th { background: #f5f7fa; font-weight: 600; }
+        code { background: #f5f7fa; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 14px; }
+        pre { margin: 16px 0; padding: 16px; background: #1e1e1e; border-radius: 8px; overflow-x: auto; }
+        pre code { background: none; color: #d4d4d4; padding: 0; }
+        img { 
+            max-width: 100%; 
+            border-radius: ${config.imageRadius}px; 
+            margin: ${config.imageSpacing}px 0;
+            ${config.imageBorder ? 'border: 1px solid rgba(0, 0, 0, 0.1);' : ''}
+            ${config.imageShadow ? 'box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);' : ''}
+        }
+        a { color: #165DFF; text-decoration: none; }
+        .footnote { font-size: 14px; color: #999; margin-top: 32px; padding-top: 16px; border-top: 1px solid #e5e5e5; }
+    </style>
+</head>
+<body>
+${previewEl.innerHTML}
+</body>
+</html>`;
+            
+            const dataUri = 'data:text/html;charset=utf-8,'+ encodeURIComponent(html);
+            const exportFileDefaultName = `${document.querySelector('.draft-item.active .draft-title')?.textContent || 'article'}.html`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+
+        // 工具函数
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+            // 隐藏调试 HTML
+            const debugEl = document.getElementById('debug-html');
+            if (debugEl) {
+                debugEl.style.display = 'none';
+            }
+        }
+
+        // 切换调试 HTML 显示
+        function toggleDebugHtml() {
+            const debugEl = document.getElementById('debug-html');
+            if (debugEl.style.display === 'none') {
+                debugEl.value = debugSafeHtml;
+                debugEl.style.display = 'block';
+            } else {
+                debugEl.style.display = 'none';
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDate(timestamp, format = 'normal') {
+            const date = new Date(timestamp);
+            if (format === 'filename') {
+                return `${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}`;
+            }
+            const now = Date.now();
+            const diff = now - timestamp;
+            
+            if (diff < 60000) return '刚刚';
+            if (diff < 3600000) return `${Math.floor(diff / 60000)}分钟前`;
+            if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`;
+            if (diff < 604800000) return `${Math.floor(diff / 86400000)}天前`;
+            
+            return `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+    </script>
+</body>
+</html>
