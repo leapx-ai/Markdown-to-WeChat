@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="./styles.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@6.0.1/lib/codemirror.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@6.0.1/theme/one-dark.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@6.0.1/theme/monokai.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@6.0.1/mode/markdown/markdown.css">
   </head>
   <body>
@@ -17,6 +18,8 @@
       </div>
       <div class="header-actions">
         <button id="settingsBtn" type="button" class="icon-button" aria-label="设置">⚙️</button>
+        <button id="themeToggleBtn" type="button" class="icon-button" aria-label="深色模式">🌙</button>
+        <button id="smartFormatBtn" type="button">✨ 智能排版</button>
         <button id="loadSampleBtn" type="button">示例</button>
         <button id="exportBtn" type="button">导出 HTML</button>
         <button id="copyBtn" type="button" class="primary">复制到公众号</button>
@@ -26,8 +29,28 @@
     <div id="settingsDropdown" class="dropdown" hidden>
       <div class="dropdown-section">
         <label class="field">
+          <span>模板分类</span>
+          <select id="templateCategorySelect">
+            <option value="all">全部模板</option>
+            <option value="work">职场办公</option>
+            <option value="tech">技术教程</option>
+            <option value="life">生活分享</option>
+            <option value="travel">旅行攻略</option>
+            <option value="food">美食探店</option>
+          </select>
+        </label>
+      </div>
+      <div class="dropdown-section">
+        <label class="field">
           <span>模板</span>
-          <select id="templateSelect"></select>
+          <select id="templateSelect">
+            <option value="default">默认模板</option>
+            <option value="work-report">工作汇报</option>
+            <option value="tech-article">技术文章</option>
+            <option value="life-diary">生活日记</option>
+            <option value="travel-guide">旅行攻略</option>
+            <option value="food-review">美食测评</option>
+          </select>
         </label>
       </div>
       <div class="dropdown-section">
@@ -44,6 +67,7 @@
       </div>
       <div class="dropdown-divider"></div>
       <button id="insertTemplateBtn" type="button" class="dropdown-item">插入模板</button>
+      <button id="saveTemplateBtn" type="button" class="dropdown-item">保存为模板</button>
     </div>
 
     <main class="workspace">
@@ -213,6 +237,29 @@
         document.getElementById('saveState').textContent = '已自动保存'
       })
 
+      // 同步滚动功能
+      let isSyncing = false
+      
+      editor.on('scroll', () => {
+        if (isSyncing) return
+        isSyncing = true
+        const editorScrollInfo = editor.getScrollInfo()
+        const scrollPercentage = editorScrollInfo.top / (editorScrollInfo.height - editorScrollInfo.clientHeight)
+        const previewFrame = document.querySelector('.phone-frame')
+        previewFrame.scrollTop = scrollPercentage * (previewFrame.scrollHeight - previewFrame.clientHeight)
+        setTimeout(() => isSyncing = false, 100)
+      })
+
+      document.querySelector('.phone-frame').addEventListener('scroll', () => {
+        if (isSyncing) return
+        isSyncing = true
+        const previewFrame = document.querySelector('.phone-frame')
+        const scrollPercentage = previewFrame.scrollTop / (previewFrame.scrollHeight - previewFrame.clientHeight)
+        const editorScrollInfo = editor.getScrollInfo()
+        editor.scrollTo(null, scrollPercentage * (editorScrollInfo.height - editorScrollInfo.clientHeight))
+        setTimeout(() => isSyncing = false, 100)
+      })
+
       // 全局变量
       let currentContent = ''
 
@@ -302,6 +349,139 @@ function hello() {
         showToast('✅ 已加载示例内容')
       })
 
+      // 智能排版功能
+      document.getElementById('smartFormatBtn').addEventListener('click', () => {
+        let content = editor.getValue()
+        let changes = 0
+
+        // 1. 中英文之间自动加空格
+        const beforeLength = content.length
+        content = content.replace(/([\u4e00-\u9fa5])([a-zA-Z0-9])/g, '$1 $2')
+        content = content.replace(/([a-zA-Z0-9])([\u4e00-\u9fa5])/g, '$1 $2')
+        changes += (beforeLength - content.length) / 2
+
+        // 2. 中文与数字之间加空格
+        content = content.replace(/([\u4e00-\u9fa5])([0-9])/g, '$1 $2')
+        content = content.replace(/([0-9])([\u4e00-\u9fa5])/g, '$1 $2')
+
+        // 3. 中文与标点符号优化
+        content = content.replace(/([\u4e00-\u9fa5])([，。！？；：])/g, '$1$2')
+        content = content.replace(/([，。！？；：])([\u4e00-\u9fa5])/g, '$1 $2')
+
+        // 4. 特殊符号替换
+        content = content.replace(/--/g, '——')
+        content = content.replace(/\.\.\./g, '…')
+
+        // 5. 去除多余空行（最多保留一个空行）
+        content = content.replace(/\n\s*\n\s*\n/g, '\n\n')
+
+        // 6. 标题层级优化（确保#后面有空格）
+        content = content.replace(/^(#{1,6})([^\s#])/gm, '$1 $2')
+
+        // 7. 列表优化（-/*后面有空格）
+        content = content.replace(/^([-*+])([^\s])/gm, '$1 $2')
+        content = content.replace(/^(\d+\.)([^\s])/gm, '$1 $2')
+
+        editor.setValue(content)
+        showToast(`✅ 智能排版完成，共优化${changes || '若干'}处格式`) 
+      })
+
+      // 模板库功能
+      const templates = {
+        default: '# 标题\n\n## 副标题\n\n正文内容...',
+        'work-report': '# 工作汇报\n\n## 本周完成工作\n- [x] 任务1\n- [x] 任务2\n\n## 下周计划\n- [ ] 计划1\n- [ ] 计划2\n\n## 需要协调的问题\n> 问题描述...',
+        'tech-article': '# 技术教程\n\n## 背景介绍\n\n## 实现步骤\n\`\`\`代码块\`\`\`\n\n## 总结',
+        'life-diary': '# 生活日记\n\n## 今日心情：😊\n\n## 今日事件\n\n## 今日收获',
+        'travel-guide': '# 旅行攻略\n\n## 📍 目的地\n\n## ✅ 准备清单\n\n## 🗺️ 行程安排\n\n## 🍜 美食推荐',
+        'food-review': '# 美食测评\n\n## 🏠 店铺信息\n- 名称：\n- 地址：\n- 人均：\n\n## 🍽️ 菜品评价\n\n## ⭐️ 综合评分'
+      }
+
+      const templateCategories = {
+        all: ['default', 'work-report', 'tech-article', 'life-diary', 'travel-guide', 'food-review'],
+        work: ['work-report'],
+        tech: ['tech-article'],
+        life: ['life-diary'],
+        travel: ['travel-guide'],
+        food: ['food-review']
+      }
+
+      const templateNames = {
+        default: '默认模板',
+        'work-report': '工作汇报',
+        'tech-article': '技术文章',
+        'life-diary': '生活日记',
+        'travel-guide': '旅行攻略',
+        'food-review': '美食测评'
+      }
+
+      // 模板分类切换
+      document.getElementById('templateCategorySelect').addEventListener('change', (e) => {
+        const category = e.target.value
+        const templateSelect = document.getElementById('templateSelect')
+        templateSelect.innerHTML = ''
+        
+        templateCategories[category].forEach(templateId => {
+          const option = document.createElement('option')
+          option.value = templateId
+          option.textContent = templateNames[templateId]
+          templateSelect.appendChild(option)
+        })
+      })
+
+      // 插入模板
+      document.getElementById('insertTemplateBtn').addEventListener('click', () => {
+        const selectedTemplate = document.getElementById('templateSelect').value
+        const templateContent = templates[selectedTemplate]
+        editor.setValue(templateContent)
+        settingsDropdown.hidden = true
+        showToast(`✅ 已插入${templateNames[selectedTemplate]}`)
+      })
+
+      // 保存为模板
+      document.getElementById('saveTemplateBtn').addEventListener('click', () => {
+        const currentContent = editor.getValue()
+        const templateName = prompt('请输入模板名称：')
+        if (templateName) {
+          const templateId = 'custom-' + Date.now()
+          templates[templateId] = currentContent
+          templateNames[templateId] = templateName
+          templateCategories.all.push(templateId)
+          
+          // 更新下拉选项
+          const templateSelect = document.getElementById('templateSelect')
+          const option = document.createElement('option')
+          option.value = templateId
+          option.textContent = templateName
+          templateSelect.appendChild(option)
+          
+          // 保存到localStorage
+          const savedTemplates = JSON.parse(localStorage.getItem('customTemplates') || '{}')
+          savedTemplates[templateId] = { name: templateName, content: currentContent }
+          localStorage.setItem('customTemplates', JSON.stringify(savedTemplates))
+          
+          showToast('✅ 模板已保存')
+        }
+        settingsDropdown.hidden = true
+      })
+
+      // 加载自定义模板
+      function loadCustomTemplates() {
+        const savedTemplates = JSON.parse(localStorage.getItem('customTemplates') || '{}')
+        Object.entries(savedTemplates).forEach(([templateId, data]) => {
+          templates[templateId] = data.content
+          templateNames[templateId] = data.name
+          templateCategories.all.push(templateId)
+          
+          const option = document.createElement('option')
+          option.value = templateId
+          option.textContent = data.name
+          document.getElementById('templateSelect').appendChild(option)
+        })
+      }
+
+      // 初始化加载自定义模板
+      loadCustomTemplates()
+
       // 导出按钮
       document.getElementById('exportBtn').addEventListener('click', () => {
         const content = editor.getValue()
@@ -356,6 +536,31 @@ function hello() {
           </div>
         `
       }
+
+      // 深色模式切换
+      let isDarkMode = false
+      document.getElementById('themeToggleBtn').addEventListener('click', () => {
+        isDarkMode = !isDarkMode
+        const body = document.body
+        const preview = document.getElementById('preview')
+        const phoneFrame = document.querySelector('.phone-frame')
+        
+        if (isDarkMode) {
+          body.classList.add('dark-mode')
+          preview.classList.add('dark-preview')
+          phoneFrame.classList.add('dark-frame')
+          editor.setOption('theme', 'monokai')
+          document.getElementById('themeToggleBtn').textContent = '☀️'
+          showToast('🌙 已切换到深色模式')
+        } else {
+          body.classList.remove('dark-mode')
+          preview.classList.remove('dark-preview')
+          phoneFrame.classList.remove('dark-frame')
+          editor.setOption('theme', 'one-dark')
+          document.getElementById('themeToggleBtn').textContent = '🌙'
+          showToast('☀️ 已切换到浅色模式')
+        }
+      })
 
       // 初始化
       updatePreview(editor.getValue())
