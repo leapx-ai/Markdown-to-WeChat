@@ -199,12 +199,19 @@ button.primary:hover {
   line-height: 1.7;
 }
 
-.cm-editor {
+.CodeMirror {
   height: 100%;
+  padding: 0;
 }
 
-.cm-scroller {
+.CodeMirror-scroll {
   padding: 20px;
+}
+
+.CodeMirror-gutters {
+  border-right: 1px solid var(--border);
+  background: var(--panel-alt);
+  padding-right: 8px;
 }
 
 .phone-frame {
