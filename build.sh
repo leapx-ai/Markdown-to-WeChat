@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 构建目录
-BUILD_DIR="dist"
+BUILD_DIR="docs"
 
 # 清理旧的构建目录
 rm -rf $BUILD_DIR
@@ -19,4 +19,4 @@ echo "Build time: $(date)" > $BUILD_DIR/version.txt
 echo "Commit: $(git rev-parse --short HEAD)" >> $BUILD_DIR/version.txt
 
 echo "✅ 构建完成！输出目录：$BUILD_DIR"
-echo "📦 可以直接将dist目录部署到任意静态服务器"
+echo "📦 可以直接将docs目录部署到任意静态服务器，支持GitHub Pages"
