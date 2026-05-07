@@ -73,6 +73,9 @@ const imageRadiusInput = document.querySelector("#imageRadiusInput");
 const imageCaptionToggle = document.querySelector("#imageCaptionToggle");
 const previewZoomSelect = document.querySelector("#previewZoomSelect");
 const toggleFocusBtn = document.querySelector("#toggleFocusBtn");
+const shortcutModal = document.querySelector("#shortcutModal");
+const closeShortcutBtn = document.querySelector("#closeShortcutBtn");
+const closeShortcutBtn2 = document.querySelector("#closeShortcutBtn2");
 
 let editor = null;
 let isApplyingEditorValue = false;
@@ -102,6 +105,64 @@ function safeStorageSet (key, value) {
     }
     throw e;
   }
+}
+
+/* ===== 动画辅助 ===== */
+function animateModalOpen (backdrop) {
+  if (!backdrop) return;
+  backdrop.hidden = false;
+  document.body.classList.add("modal-open");
+}
+
+function animateModalClose (backdrop, callback) {
+  if (!backdrop || backdrop.hidden) return;
+  const modal = backdrop.querySelector(".modal");
+  if (modal) {
+    modal.style.opacity = "0";
+    modal.style.transform = "scale(0.96) translateY(8px)";
+  }
+  backdrop.style.opacity = "0";
+  window.setTimeout(() => {
+    backdrop.hidden = true;
+    if (modal) {
+      modal.style.opacity = "";
+      modal.style.transform = "";
+    }
+    backdrop.style.opacity = "";
+    if (callback) callback();
+  }, 220);
+}
+
+function animateDropdownClose (dropdown) {
+  if (!dropdown || dropdown.hidden) return;
+  dropdown.style.opacity = "0";
+  dropdown.style.transform = "translateY(-6px)";
+  window.setTimeout(() => {
+    dropdown.hidden = true;
+    dropdown.style.opacity = "";
+    dropdown.style.transform = "";
+  }, 180);
+}
+
+/* ===== 统计数字递增动画 ===== */
+const statCardValues = new Map();
+
+function animateNumber (element, target, duration = 400) {
+  const start = performance.now();
+  const from = statCardValues.get(element) || 0;
+  statCardValues.set(element, target);
+  const diff = target - from;
+  if (diff === 0) return;
+
+  function step (now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = Math.round(from + diff * eased);
+    element.textContent = String(current);
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
 }
 
 function getMarkdownValue () {
@@ -170,17 +231,30 @@ function analyzeMarkdown (markdown) {
 
 function renderStats (markdown) {
   const summary = analyzeMarkdown(markdown);
-  stats.innerHTML = [
+  const data = [
     ["字数", summary.wordCount],
     ["阅读", `${summary.readingMinutes} 分钟`],
     ["标题", summary.headings],
     ["图片", summary.images],
-  ]
-    .map(
-      ([label, value]) =>
-        `<div class="stat-card"><strong>${value}</strong><span>${label}</span></div>`,
-    )
-    .join("");
+  ];
+
+  if (!stats.children.length) {
+    stats.innerHTML = data
+      .map(() => `<div class="stat-card"><strong>0</strong><span></span></div>`)
+      .join("");
+  }
+
+  data.forEach(([label, value], index) => {
+    const card = stats.children[index];
+    if (!card) return;
+    const strong = card.querySelector("strong");
+    const span = card.querySelector("span");
+    if (strong) {
+      const num = typeof value === "number" ? value : summary.wordCount;
+      animateNumber(strong, num);
+    }
+    if (span) span.textContent = label;
+  });
 }
 
 function buildWarnings (markdown) {
@@ -270,7 +344,11 @@ function buildWarnings (markdown) {
 function renderWarnings (markdown) {
   const items = buildWarnings(markdown);
   if (!items.length) {
-    warnings.innerHTML = `<div class="warning ok">当前内容没有明显的公众号兼容性风险。</div>`;
+    warnings.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">✅</div>
+        <p>当前内容没有明显的公众号兼容性风险</p>
+      </div>`;
     return;
   }
   warnings.innerHTML = items
@@ -448,16 +526,16 @@ function openPreflightModal () {
     .join("");
   preflightList.innerHTML = items.length
     ? items.map((item) => `<div class="warning ${item.level}">${item.text}</div>`).join("")
-    : `<div class="warning ok">预检通过，当前内容没有明显的公众号兼容性风险。</div>`;
+    : `<div class="empty-state"><div class="empty-state-icon">✅</div><p>预检通过，当前内容没有明显的公众号兼容性风险</p></div>`;
   confirmCopyBtn.textContent = counts.danger ? "仍然复制" : "继续复制";
-  preflightModal.hidden = false;
-  document.body.classList.add("modal-open");
+  animateModalOpen(preflightModal);
   confirmCopyBtn.focus();
 }
 
 function closePreflightModal () {
-  preflightModal.hidden = true;
-  if (themeEditorModal.hidden) document.body.classList.remove("modal-open");
+  animateModalClose(preflightModal, () => {
+    if (themeEditorModal.hidden && (!shortcutModal || shortcutModal.hidden)) document.body.classList.remove("modal-open");
+  });
 }
 
 async function copyRenderedHtml () {
@@ -676,7 +754,7 @@ function init () {
 
     document.addEventListener("click", (event) => {
       if (!settingsDropdown.contains(event.target) && event.target !== settingsBtn) {
-        settingsDropdown.hidden = true;
+        animateDropdownClose(settingsDropdown);
       }
     });
   }
@@ -698,7 +776,7 @@ function init () {
       templates[key] = { name: String(name), content: getMarkdownValue() };
       populateSelects();
       templateSelect.value = key;
-      if (settingsDropdown) settingsDropdown.hidden = true;
+      if (settingsDropdown) animateDropdownClose(settingsDropdown);
       showToast("模板已保存");
     });
   }
@@ -803,8 +881,18 @@ function init () {
     if (!draftList) return;
     const items = readDrafts();
     if (!items.length) {
-      draftList.innerHTML =
-        '<div style="padding: 32px; text-align: center; color: var(--muted);"><p>暂无草稿</p></div>';
+      draftList.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">📝</div>
+          <p>暂无草稿</p>
+          <button type="button" class="empty-state-action" id="emptyNewDraftBtn">+ 创建第一个草稿</button>
+        </div>`;
+      const emptyBtn = draftList.querySelector("#emptyNewDraftBtn");
+      if (emptyBtn) {
+        emptyBtn.addEventListener("click", () => {
+          if (newDraftBtn) newDraftBtn.click();
+        });
+      }
       return;
     }
     draftList.innerHTML = items
@@ -832,7 +920,7 @@ function init () {
         setMarkdownValue(String(draft.content || ""));
         saveDraft();
         render();
-        if (draftModal) draftModal.hidden = true;
+        if (draftModal) closeDraftModal();
         showToast("草稿已加载");
       });
     });
@@ -848,22 +936,28 @@ function init () {
     });
   }
 
+  function closeDraftModal () {
+    animateModalClose(draftModal, () => {
+      if (preflightModal.hidden && themeEditorModal.hidden && (!shortcutModal || shortcutModal.hidden)) {
+        document.body.classList.remove("modal-open");
+      }
+    });
+  }
+
   if (draftBtn && draftModal) {
     draftBtn.addEventListener("click", () => {
-      draftModal.hidden = false;
+      animateModalOpen(draftModal);
       renderDraftList();
     });
   }
 
   if (closeDraftBtn && draftModal) {
-    closeDraftBtn.addEventListener("click", () => {
-      draftModal.hidden = true;
-    });
+    closeDraftBtn.addEventListener("click", closeDraftModal);
   }
 
   if (draftModal) {
     draftModal.addEventListener("click", (event) => {
-      if (event.target === draftModal) draftModal.hidden = true;
+      if (event.target === draftModal) closeDraftModal();
     });
   }
 
@@ -1044,7 +1138,7 @@ function init () {
   if (insertTemplateBtn) {
     insertTemplateBtn.addEventListener("click", () => {
       insertTemplate();
-      if (settingsDropdown) settingsDropdown.hidden = true;
+      if (settingsDropdown) animateDropdownClose(settingsDropdown);
       showToast("模板已插入");
     });
   }
@@ -1071,11 +1165,119 @@ function init () {
   if (previewZoomSelect) previewZoomSelect.addEventListener("change", updatePreviewZoom);
   if (toggleFocusBtn) toggleFocusBtn.addEventListener("click", togglePreviewFocus);
 
+  function openShortcutModal () {
+    animateModalOpen(shortcutModal);
+    if (closeShortcutBtn2) closeShortcutBtn2.focus();
+  }
+
+  function closeShortcutModal () {
+    animateModalClose(shortcutModal, () => {
+      if (preflightModal.hidden && themeEditorModal.hidden && draftModal.hidden) document.body.classList.remove("modal-open");
+    });
+  }
+
+  if (closeShortcutBtn) closeShortcutBtn.addEventListener("click", closeShortcutModal);
+  if (closeShortcutBtn2) closeShortcutBtn2.addEventListener("click", closeShortcutModal);
+  if (shortcutModal) {
+    shortcutModal.addEventListener("click", (event) => {
+      if (event.target === shortcutModal) closeShortcutModal();
+    });
+  }
+
+  /* ===== 拖拽调整列宽 ===== */
+  function initResizeHandles () {
+    const handles = document.querySelectorAll(".resize-handle");
+    if (!handles.length) return;
+
+    const editorPane = document.querySelector(".editor-pane");
+    const previewPane = document.querySelector(".preview-pane");
+    const inspectorPane = document.querySelector(".inspector");
+    if (!editorPane || !previewPane) return;
+
+    function updateHandlePositions () {
+      const workspaceRect = workspace.getBoundingClientRect();
+      const editorRect = editorPane.getBoundingClientRect();
+      const previewRect = previewPane.getBoundingClientRect();
+
+      handles.forEach((handle) => {
+        const type = handle.dataset.handle;
+        if (type === "editor-preview") {
+          handle.style.left = `${editorRect.right - workspaceRect.left}px`;
+          handle.style.top = "0";
+          handle.style.height = "100%";
+          handle.style.display = workspace.classList.contains("focus-preview") ? "none" : "block";
+        } else if (type === "preview-inspector") {
+          handle.style.left = `${previewRect.right - workspaceRect.left}px`;
+          handle.style.top = "0";
+          handle.style.height = "100%";
+          const inspectorVisible = window.innerWidth > 1200 && !workspace.classList.contains("focus-preview");
+          handle.style.display = inspectorVisible ? "block" : "none";
+        }
+      });
+    }
+
+    let isResizing = false;
+    let currentHandle = null;
+    let startX = 0;
+    let startEditorWidth = 0;
+    let startPreviewWidth = 0;
+
+    handles.forEach((handle) => {
+      handle.addEventListener("mousedown", (e) => {
+        if (workspace.classList.contains("focus-preview")) return;
+        isResizing = true;
+        currentHandle = handle.dataset.handle;
+        startX = e.clientX;
+        const workspaceRect = workspace.getBoundingClientRect();
+        startEditorWidth = editorPane.getBoundingClientRect().width;
+        startPreviewWidth = previewPane.getBoundingClientRect().width;
+        handle.classList.add("resizing");
+        document.body.classList.add("resizing");
+        e.preventDefault();
+      });
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (!isResizing) return;
+      const dx = e.clientX - startX;
+      const gap = 14;
+      const workspaceWidth = workspace.getBoundingClientRect().width - gap * 2;
+
+      if (currentHandle === "editor-preview") {
+        const newEditorWidth = Math.max(320, Math.min(startEditorWidth + dx, workspaceWidth - 360 - 240));
+        const remaining = workspaceWidth - newEditorWidth;
+        const newPreviewWidth = Math.max(360, Math.min(520, remaining - 280));
+        const newInspectorWidth = remaining - newPreviewWidth;
+        workspace.style.gridTemplateColumns = `${newEditorWidth}px ${newPreviewWidth}px ${Math.max(240, newInspectorWidth)}px`;
+      } else if (currentHandle === "preview-inspector") {
+        const newPreviewWidth = Math.max(360, Math.min(520, startPreviewWidth + dx));
+        const remaining = workspaceWidth - newPreviewWidth;
+        const newEditorWidth = Math.max(320, Math.min(startEditorWidth, remaining - 240));
+        const newInspectorWidth = remaining - newEditorWidth;
+        workspace.style.gridTemplateColumns = `${newEditorWidth}px ${newPreviewWidth}px ${Math.max(240, newInspectorWidth)}px`;
+      }
+    });
+
+    window.addEventListener("mouseup", () => {
+      if (!isResizing) return;
+      isResizing = false;
+      handles.forEach((h) => h.classList.remove("resizing"));
+      document.body.classList.remove("resizing");
+      currentHandle = null;
+    });
+
+    window.addEventListener("resize", updateHandlePositions);
+    updateHandlePositions();
+  }
+
+  initResizeHandles();
+
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
-      if (!preflightModal.hidden) closePreflightModal();
-      if (!themeEditorModal.hidden) closeThemeEditor();
-      if (draftModal && !draftModal.hidden) draftModal.hidden = true;
+      if (shortcutModal && !shortcutModal.hidden) { closeShortcutModal(); return; }
+      if (!preflightModal.hidden) { closePreflightModal(); return; }
+      if (!themeEditorModal.hidden) { closeThemeEditor(); return; }
+      if (draftModal && !draftModal.hidden) { closeDraftModal(); return; }
       return;
     }
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
@@ -1086,6 +1288,10 @@ function init () {
     if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === "c") {
       event.preventDefault();
       openPreflightModal();
+    }
+    if ((event.ctrlKey || event.metaKey) && event.key === "/") {
+      event.preventDefault();
+      openShortcutModal();
     }
   });
 }

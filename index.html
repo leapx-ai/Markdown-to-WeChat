@@ -142,6 +142,8 @@
           <button id="toggleFocusBtn" type="button" class="wide-button">专注预览</button>
         </div>
       </aside>
+      <div class="resize-handle" data-handle="editor-preview" aria-hidden="true"></div>
+      <div class="resize-handle" data-handle="preview-inspector" aria-hidden="true"></div>
     </main>
 
     <div id="toast" class="toast" hidden></div>
@@ -273,6 +275,32 @@
           <button id="resetThemeBtn" type="button">重置</button>
           <button id="exportThemeBtn" type="button">导出主题</button>
           <button id="saveThemeBtn" type="button" class="primary">保存并使用</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- 快捷键帮助模态框 -->
+    <div id="shortcutModal" class="modal-backdrop" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="shortcutTitle" style="min-width: 520px;">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Shortcuts</p>
+            <h2 id="shortcutTitle">快捷键</h2>
+          </div>
+          <button id="closeShortcutBtn" type="button" class="icon-button" aria-label="关闭">×</button>
+        </div>
+        <div class="shortcut-grid">
+          <div class="shortcut-item"><span>保存</span><span class="shortcut-key"><kbd>Ctrl</kbd> / <kbd>Cmd</kbd> + <kbd>S</kbd></span></div>
+          <div class="shortcut-item"><span>复制到公众号</span><span class="shortcut-key"><kbd>Ctrl</kbd> / <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>C</kbd></span></div>
+          <div class="shortcut-item"><span>加粗</span><span class="shortcut-key"><kbd>Ctrl</kbd> / <kbd>Cmd</kbd> + <kbd>B</kbd></span></div>
+          <div class="shortcut-item"><span>斜体</span><span class="shortcut-key"><kbd>Ctrl</kbd> / <kbd>Cmd</kbd> + <kbd>I</kbd></span></div>
+          <div class="shortcut-item"><span>插入链接</span><span class="shortcut-key"><kbd>Ctrl</kbd> / <kbd>Cmd</kbd> + <kbd>K</kbd></span></div>
+          <div class="shortcut-item"><span>插入图片</span><span class="shortcut-key"><kbd>Ctrl</kbd> / <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>M</kbd></span></div>
+          <div class="shortcut-item"><span>导出</span><span class="shortcut-key"><kbd>Ctrl</kbd> / <kbd>Cmd</kbd> + <kbd>E</kbd></span></div>
+          <div class="shortcut-item"><span>显示快捷键</span><span class="shortcut-key"><kbd>Ctrl</kbd> / <kbd>Cmd</kbd> + <kbd>/</kbd></span></div>
+        </div>
+        <div class="modal-actions">
+          <button id="closeShortcutBtn2" type="button" class="primary">知道了</button>
         </div>
       </section>
     </div>

@@ -336,12 +336,12 @@ function resetCustomTheme () {
 function openThemeEditor () {
   syncThemeEditor();
   if (themeEditorModal) themeEditorModal.dispatchEvent(new Event("input"));
-  themeEditorModal.hidden = false;
-  document.body.classList.add("modal-open");
+  animateModalOpen(themeEditorModal);
   customAccentInput.focus();
 }
 
 function closeThemeEditor () {
-  themeEditorModal.hidden = true;
-  if (preflightModal.hidden) document.body.classList.remove("modal-open");
+  animateModalClose(themeEditorModal, () => {
+    if (preflightModal.hidden && (!shortcutModal || shortcutModal.hidden)) document.body.classList.remove("modal-open");
+  });
 }
