@@ -88,8 +88,15 @@ function highlightCode (code, lang, codeTheme) {
   const keywordSets = {
     js: "await break case catch class const continue default delete do else export extends finally for function if import in instanceof let new return switch throw try typeof var void while yield async",
     ts: "await break case catch class const continue default delete do else export extends finally for function if import in instanceof let new return switch throw try typeof var void while yield async interface type enum implements private public readonly",
-    css: "display position color background margin padding border grid flex width height font transform transition",
-    html: "section article div span p h1 h2 h3 img a table tr td th",
+    css: "display position color background margin padding border grid flex width height font transform transition animation opacity z-index overflow float clear box-shadow border-radius align justify content items",
+    html: "section article div span p h1 h2 h3 img a table tr td th ul ol li header footer main nav aside figure figcaption strong em code pre blockquote",
+    python: "and as assert break class continue def del elif else except False finally for from global if import in is lambda None nonlocal not or pass raise return True try while with yield",
+    bash: "if then else elif fi for while do done case esac in function return exit export source alias sudo chmod chown cp mv rm mkdir cd ls cat grep sed awk echo printf touch wget curl git docker",
+    json: "true false null",
+    yaml: "true false yes no on off null",
+    sql: "select from where and or not insert into values update delete create table drop index join left right inner outer union all group by order having limit offset distinct count sum avg max min as on set alter add column primary key foreign references",
+    go: "break case chan const continue default defer else fallthrough for func go goto if import interface map package range return select struct switch type var",
+    rust: "as async await break const continue crate else enum extern false fn for if impl in let loop match mod move mut pub ref return self Self static struct super trait true type unsafe use where while",
   };
   const normalized = (lang || "js").toLowerCase();
   const keywords = keywordSets[normalized] || keywordSets.js;

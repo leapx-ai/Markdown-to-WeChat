@@ -78,6 +78,7 @@ let editor = null;
 let isApplyingEditorValue = false;
 let saveDraftTimer = null;
 let isSyncingScroll = false;
+let imageCheckId = 0;
 
 function showToast (message, type = "success") {
   if (!toast) return;
@@ -316,6 +317,36 @@ function render () {
   renderStats(markdown);
   renderWarnings(markdown);
   renderThemeCards();
+
+  const currentCheckId = ++imageCheckId;
+  const images = preview.querySelectorAll("img");
+  let pending = images.length;
+  const oversized = [];
+  if (!pending) return;
+  images.forEach((img) => {
+    const done = () => {
+      if (currentCheckId !== imageCheckId) return;
+      if (img.naturalWidth > 1920 || img.naturalHeight > 1920) {
+        oversized.push(img.alt || img.src.slice(0, 40));
+      }
+      pending--;
+      if (pending === 0 && oversized.length && warnings) {
+        const node = document.createElement("div");
+        node.className = "warning warn";
+        node.textContent = `检测到 ${oversized.length} 张图片超过 1920px，建议压缩后重新上传，避免公众号后台压缩模糊。`;
+        warnings.appendChild(node);
+      }
+    };
+    if (img.complete) {
+      done();
+    } else {
+      img.addEventListener("load", done, { once: true });
+      img.addEventListener("error", () => {
+        if (currentCheckId !== imageCheckId) return;
+        pending--;
+      }, { once: true });
+    }
+  });
 }
 
 function readCustomTemplates () {
@@ -718,8 +749,13 @@ function init () {
 
   if (shareBtn) {
     shareBtn.addEventListener("click", async () => {
+      const content = getMarkdownValue();
+      if (content.length > 3000) {
+        showToast("内容超过 3000 字，分享链接可能因过长而失效，建议导出文件分享", "error");
+        return;
+      }
       const data = {
-        content: getMarkdownValue(),
+        content,
         title: "分享的 Markdown 文档",
         createdAt: new Date().toISOString(),
       };
