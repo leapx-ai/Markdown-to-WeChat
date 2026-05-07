@@ -10,6 +10,7 @@ mkdir -p $BUILD_DIR
 # 复制核心文件
 cp index.html $BUILD_DIR/
 cp styles.css $BUILD_DIR/
+cp app.js $BUILD_DIR/
 
 # 复制依赖库
 cp -r lib $BUILD_DIR/

@@ -79,6 +79,7 @@
           <strong>Markdown</strong>
           <span id="saveState">已自动保存</span>
         </div>
+        <textarea id="markdownInput" hidden></textarea>
         <div id="markdownEditor"></div>
       </section>
 
@@ -282,7 +283,7 @@
     <script src="./lib/codemirror/matchbrackets.min.js"></script>
     <script src="./lib/codemirror/active-line.min.js"></script>
 
-    <script>
+    <script type="text/plain" data-legacy="true">
       // 初始化CodeMirror编辑器
       const editor = CodeMirror(document.getElementById('markdownEditor'), {
         value: localStorage.getItem('markdownDraft') || '',
@@ -1059,5 +1060,6 @@ Ctrl/Cmd + /          显示快捷键帮助
       updatePreview(editor.getValue())
       updateStats(editor.getValue())
     </script>
+    <script src="./app.js"></script>
   </body>
 </html>
