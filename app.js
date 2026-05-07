@@ -346,7 +346,6 @@ function renderWarnings (markdown) {
   if (!items.length) {
     warnings.innerHTML = `
       <div class="empty-state">
-        <div class="empty-state-icon">✅</div>
         <p>当前内容没有明显的公众号兼容性风险</p>
       </div>`;
     return;
@@ -526,7 +525,7 @@ function openPreflightModal () {
     .join("");
   preflightList.innerHTML = items.length
     ? items.map((item) => `<div class="warning ${item.level}">${item.text}</div>`).join("")
-    : `<div class="empty-state"><div class="empty-state-icon">✅</div><p>预检通过，当前内容没有明显的公众号兼容性风险</p></div>`;
+    : `<div class="empty-state"><p>预检通过，当前内容没有明显的公众号兼容性风险</p></div>`;
   confirmCopyBtn.textContent = counts.danger ? "仍然复制" : "继续复制";
   animateModalOpen(preflightModal);
   confirmCopyBtn.focus();
@@ -883,9 +882,8 @@ function init () {
     if (!items.length) {
       draftList.innerHTML = `
         <div class="empty-state">
-          <div class="empty-state-icon">📝</div>
           <p>暂无草稿</p>
-          <button type="button" class="empty-state-action" id="emptyNewDraftBtn">+ 创建第一个草稿</button>
+          <button type="button" class="empty-state-action" id="emptyNewDraftBtn">创建第一个草稿</button>
         </div>`;
       const emptyBtn = draftList.querySelector("#emptyNewDraftBtn");
       if (emptyBtn) {
@@ -898,14 +896,14 @@ function init () {
     draftList.innerHTML = items
       .map(
         (draft) => `
-          <div style="padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-            <div style="flex: 1; min-width: 0;">
-              <div style="font-weight: 600; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(String(draft.name || "未命名草稿"))}</div>
-              <div style="font-size: 12px; color: var(--muted);">更新于：${new Date(draft.updatedAt || draft.createdAt || Date.now()).toLocaleString("zh-CN")}</div>
+          <div class="draft-item">
+            <div class="draft-item-info">
+              <div class="draft-item-name">${escapeHtml(String(draft.name || "未命名草稿"))}</div>
+              <div class="draft-item-meta">更新于：${new Date(draft.updatedAt || draft.createdAt || Date.now()).toLocaleString("zh-CN")}</div>
             </div>
-            <div style="display: flex; gap: 8px; flex: 0 0 auto;">
-              <button type="button" data-load="${draft.id}" style="font-size: 12px; padding: 4px 8px; min-height: auto;">加载</button>
-              <button type="button" data-delete="${draft.id}" style="font-size: 12px; padding: 4px 8px; min-height: auto; color: #e53e3e; border-color: #e53e3e;">删除</button>
+            <div class="draft-item-actions">
+              <button type="button" data-load="${draft.id}">加载</button>
+              <button type="button" data-delete="${draft.id}">删除</button>
             </div>
           </div>
         `,

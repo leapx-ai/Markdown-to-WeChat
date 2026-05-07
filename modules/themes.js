@@ -342,6 +342,6 @@ function openThemeEditor () {
 
 function closeThemeEditor () {
   animateModalClose(themeEditorModal, () => {
-    if (preflightModal.hidden && (!shortcutModal || shortcutModal.hidden)) document.body.classList.remove("modal-open");
+    if (preflightModal.hidden && draftModal.hidden && (!shortcutModal || shortcutModal.hidden)) document.body.classList.remove("modal-open");
   });
 }
