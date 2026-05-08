@@ -189,7 +189,7 @@ function selectCodeTheme(key: string) {
       </button>
       <button
         type="button"
-        class="h-9 px-3.5 rounded-md text-[13px] font-medium bg-accent text-accent-contrast hover:bg-accent-hover border border-accent hover:border-accent-hover transition-all"
+        class="h-9 px-3.5 rounded-md text-[13px] font-medium bg-text text-surface border border-text hover:opacity-90 transition-all"
         @click="handleCopy"
       >
         复制到公众号

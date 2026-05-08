@@ -54,7 +54,7 @@ function deleteDraft(id: number) {
             </div>
             <button
               type="button"
-              class="w-8 h-8 flex items-center justify-center rounded-md text-text-tertiary hover:text-text hover:bg-surface-hover transition-colors text-xl border-none bg-transparent"
+              class="w-8 h-8 flex items-center justify-center rounded-md text-text-tertiary hover:text-text hover:bg-surface-hover text-xl border border-border-subtle hover:border-border bg-transparent transition-all"
               aria-label="关闭"
               @click="close"
             >
@@ -63,13 +63,13 @@ function deleteDraft(id: number) {
           </div>
           <div class="p-4 overflow-y-auto">
             <div class="flex gap-2 mb-4">
-              <button type="button" class="w-full h-9 px-3.5 rounded-md text-[13px] font-medium hover:bg-surface-hover bg-transparent border-none" @click="createDraft">新建草稿</button>
-              <button type="button" class="w-full h-9 px-3.5 rounded-md text-[13px] font-medium hover:bg-surface-hover bg-transparent border-none" @click="saveCurrentDraft">保存当前草稿</button>
+              <button type="button" class="w-full h-9 px-3.5 rounded-md text-[13px] font-medium bg-transparent text-text border border-border-subtle hover:border-border hover:bg-surface-hover transition-all" @click="createDraft">新建草稿</button>
+              <button type="button" class="w-full h-9 px-3.5 rounded-md text-[13px] font-medium bg-transparent text-text border border-border-subtle hover:border-border hover:bg-surface-hover transition-all" @click="saveCurrentDraft">保存当前草稿</button>
             </div>
             <div class="max-h-[400px] overflow-y-auto border border-border rounded-md">
               <div v-if="!draftStore.drafts.length" class="empty-state">
                 <p>暂无草稿</p>
-                <button type="button" class="empty-state-action" @click="createDraft">创建第一个草稿</button>
+                <button type="button" class="mt-3 h-8 px-4 rounded-md text-[13px] font-medium bg-transparent text-text-secondary border border-border-subtle hover:border-border hover:text-text hover:bg-surface-hover transition-all" @click="createDraft">创建第一个草稿</button>
               </div>
               <div
                 v-for="draft in draftStore.drafts"
@@ -83,8 +83,8 @@ function deleteDraft(id: number) {
                   </div>
                 </div>
                 <div class="flex gap-2 shrink-0">
-                  <button type="button" class="text-xs px-2 py-1 rounded-md hover:bg-surface-hover bg-transparent border-none" @click="loadDraft(draft.id)">加载</button>
-                  <button type="button" class="text-xs px-2 py-1 rounded-md hover:bg-surface-hover bg-transparent border-none" @click="deleteDraft(draft.id)">删除</button>
+                  <button type="button" class="h-7 px-2 rounded-md text-xs font-medium bg-transparent text-text-secondary border border-border-subtle hover:border-border hover:text-text hover:bg-surface-hover transition-all" @click="loadDraft(draft.id)">加载</button>
+                  <button type="button" class="h-7 px-2 rounded-md text-xs font-medium bg-transparent text-text-secondary border border-border-subtle hover:border-border hover:text-text hover:bg-surface-hover transition-all" @click="deleteDraft(draft.id)">删除</button>
                 </div>
               </div>
             </div>

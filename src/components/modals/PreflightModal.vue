@@ -37,7 +37,7 @@ async function confirmCopy() {
             </div>
             <button
               type="button"
-              class="w-8 h-8 flex items-center justify-center rounded-md text-text-tertiary hover:text-text hover:bg-surface-hover transition-colors text-xl border-none bg-transparent"
+              class="w-8 h-8 flex items-center justify-center rounded-md text-text-tertiary hover:text-text hover:bg-surface-hover text-xl border border-border-subtle hover:border-border bg-transparent transition-all"
               aria-label="关闭"
               @click="close"
             >
@@ -72,10 +72,10 @@ async function confirmCopy() {
             </div>
           </div>
           <div class="flex justify-end gap-2.5 shrink-0 px-5 pt-4 pb-5 border-t border-border-subtle dark:border-border">
-            <button type="button" class="h-9 px-3.5 rounded-md text-[13px] font-medium hover:bg-surface-hover bg-transparent border-none" @click="close">取消</button>
+            <button type="button" class="h-9 px-3.5 rounded-md text-[13px] font-medium bg-transparent text-text border border-border-subtle hover:border-border hover:bg-surface-hover transition-all" @click="close">取消</button>
             <button
               type="button"
-              class="h-9 px-3.5 rounded-md text-[13px] font-medium bg-accent text-accent-contrast hover:bg-accent-hover border-none"
+              class="h-9 px-3.5 rounded-md text-[13px] font-medium bg-text text-surface border border-text hover:opacity-90 transition-all"
               @click="confirmCopy"
             >
               {{ counts.danger ? '仍然复制' : '继续复制' }}
