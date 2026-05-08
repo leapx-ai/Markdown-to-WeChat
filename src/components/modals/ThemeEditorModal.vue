@@ -54,46 +54,53 @@ function reset() {
     <Transition name="modal">
       <div v-if="isOpen" class="modal-backdrop" @click.self="close">
         <section class="modal" role="dialog" aria-modal="true" style="min-width: 700px;">
-          <div class="modal-header">
+          <div class="flex items-start justify-between gap-4 shrink-0 px-5 pt-5 pb-4">
             <div>
-              <p class="eyebrow">Theme Builder</p>
-              <h2>自定义主题</h2>
+              <p class="text-[11px] font-semibold tracking-widest uppercase text-text-tertiary mb-0.5">Theme Builder</p>
+              <h2 class="text-lg font-semibold tracking-tight leading-tight">自定义主题</h2>
             </div>
-            <button type="button" class="icon-button" aria-label="关闭" @click="close">×</button>
+            <button
+              type="button"
+              class="w-8 h-8 flex items-center justify-center rounded-md text-text-tertiary hover:text-text hover:bg-surface-hover transition-colors text-xl border-none bg-transparent"
+              aria-label="关闭"
+              @click="close"
+            >
+              ×
+            </button>
           </div>
-          <div class="theme-editor-body">
+          <div class="p-4 grid grid-cols-2 gap-6 overflow-y-auto">
             <div>
-              <h3>颜色配置</h3>
-              <div class="theme-editor-grid">
-                <label class="compact-field">
-                  <span>主色</span>
+              <h3 class="text-base font-semibold mb-4">颜色配置</h3>
+              <div class="grid grid-cols-2 gap-4 px-5 pb-4">
+                <label class="grid gap-1.5">
+                  <span class="text-xs font-medium text-text-secondary">主色</span>
                   <input v-model="accent" type="color" />
                 </label>
-                <label class="compact-field">
-                  <span>正文色</span>
+                <label class="grid gap-1.5">
+                  <span class="text-xs font-medium text-text-secondary">正文色</span>
                   <input v-model="color" type="color" />
                 </label>
-                <label class="compact-field">
-                  <span>背景色</span>
+                <label class="grid gap-1.5">
+                  <span class="text-xs font-medium text-text-secondary">背景色</span>
                   <input v-model="bg" type="color" />
                 </label>
-                <label class="compact-field">
-                  <span>引用色</span>
+                <label class="grid gap-1.5">
+                  <span class="text-xs font-medium text-text-secondary">引用色</span>
                   <input v-model="quoteBg" type="color" />
                 </label>
-                <label class="compact-field">
-                  <span>代码块背景</span>
+                <label class="grid gap-1.5">
+                  <span class="text-xs font-medium text-text-secondary">代码块背景</span>
                   <input v-model="codeBg" type="color" />
                 </label>
-                <label class="compact-field">
-                  <span>边框色</span>
+                <label class="grid gap-1.5">
+                  <span class="text-xs font-medium text-text-secondary">边框色</span>
                   <input v-model="borderColor" type="color" />
                 </label>
               </div>
-              <h3>样式配置</h3>
-              <div class="theme-editor-grid">
-                <label class="compact-field">
-                  <span>标题样式</span>
+              <h3 class="text-base font-semibold mb-4 mt-6">样式配置</h3>
+              <div class="grid grid-cols-2 gap-4 px-5 pb-4">
+                <label class="grid gap-1.5">
+                  <span class="text-xs font-medium text-text-secondary">标题样式</span>
                   <select v-model="headingMode">
                     <option value="bar">侧边线</option>
                     <option value="chip">标签</option>
@@ -101,35 +108,28 @@ function reset() {
                     <option value="none">无样式</option>
                   </select>
                 </label>
-                <label class="compact-field">
-                  <span>正文字号</span>
+                <label class="grid gap-1.5">
+                  <span class="text-xs font-medium text-text-secondary">正文字号</span>
                   <input v-model="fontSize" type="range" min="14" max="20" />
-                  <span class="theme-editor-value">{{ fontSize }}px</span>
+                  <span class="text-xs text-text-tertiary">{{ fontSize }}px</span>
                 </label>
-                <label class="compact-field">
-                  <span>行高</span>
+                <label class="grid gap-1.5">
+                  <span class="text-xs font-medium text-text-secondary">行高</span>
                   <input v-model="lineHeight" type="range" min="150" max="220" />
-                  <span class="theme-editor-value">{{ (lineHeight / 100).toFixed(2) }}</span>
+                  <span class="text-xs text-text-tertiary">{{ (lineHeight / 100).toFixed(2) }}</span>
                 </label>
-                <label class="compact-field">
-                  <span>内容宽度</span>
+                <label class="grid gap-1.5">
+                  <span class="text-xs font-medium text-text-secondary">内容宽度</span>
                   <input v-model="width" type="range" min="360" max="600" />
-                  <span class="theme-editor-value">{{ width }}px</span>
+                  <span class="text-xs text-text-tertiary">{{ width }}px</span>
                 </label>
               </div>
             </div>
             <div>
-              <h3>实时预览</h3>
+              <h3 class="text-base font-semibold mb-4">实时预览</h3>
               <div
-                id="themePreview"
-                :style="{
-                  border: '1px solid var(--border)',
-                  borderRadius: '8px',
-                  padding: '24px',
-                  height: '500px',
-                  overflowY: 'auto',
-                  background: bg,
-                }"
+                class="border border-border rounded-lg p-6 h-[500px] overflow-y-auto"
+                :style="{ background: bg }"
               >
                 <h1 :style="{ margin: '0 0 16px', color: color }">标题示例</h1>
                 <p :style="{ margin: '0 0 12px', lineHeight: '1.8', color: color, fontSize: `${fontSize}px` }">
@@ -162,9 +162,9 @@ function reset() {
               </div>
             </div>
           </div>
-          <div class="modal-actions">
-            <button type="button" @click="reset">重置</button>
-            <button type="button" @click="save" class="primary">保存并使用</button>
+          <div class="flex justify-end gap-2.5 shrink-0 px-5 pt-4 pb-5 border-t border-border-subtle dark:border-border">
+            <button type="button" class="h-9 px-3.5 rounded-md text-[13px] font-medium hover:bg-surface-hover bg-transparent border-none" @click="reset">重置</button>
+            <button type="button" class="h-9 px-3.5 rounded-md text-[13px] font-medium bg-accent text-accent-contrast hover:bg-accent-hover border-none" @click="save">保存并使用</button>
           </div>
         </section>
       </div>

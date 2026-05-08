@@ -47,19 +47,26 @@ function deleteDraft(id: number) {
     <Transition name="modal">
       <div v-if="isOpen" class="modal-backdrop" @click.self="close">
         <section class="modal" role="dialog" aria-modal="true" style="min-width: 600px;">
-          <div class="modal-header">
+          <div class="flex items-start justify-between gap-4 shrink-0 px-5 pt-5 pb-4">
             <div>
-              <p class="eyebrow">草稿管理</p>
-              <h2>我的草稿</h2>
+              <p class="text-[11px] font-semibold tracking-widest uppercase text-text-tertiary mb-0.5">草稿管理</p>
+              <h2 class="text-lg font-semibold tracking-tight leading-tight">我的草稿</h2>
             </div>
-            <button type="button" class="icon-button" aria-label="关闭" @click="close">×</button>
+            <button
+              type="button"
+              class="w-8 h-8 flex items-center justify-center rounded-md text-text-tertiary hover:text-text hover:bg-surface-hover transition-colors text-xl border-none bg-transparent"
+              aria-label="关闭"
+              @click="close"
+            >
+              ×
+            </button>
           </div>
-          <div class="modal-body">
-            <div class="draft-list-toolbar">
-              <button type="button" class="wide-button" @click="createDraft">新建草稿</button>
-              <button type="button" class="wide-button" @click="saveCurrentDraft">保存当前草稿</button>
+          <div class="p-4 overflow-y-auto">
+            <div class="flex gap-2 mb-4">
+              <button type="button" class="w-full h-9 px-3.5 rounded-md text-[13px] font-medium hover:bg-surface-hover bg-transparent border-none" @click="createDraft">新建草稿</button>
+              <button type="button" class="w-full h-9 px-3.5 rounded-md text-[13px] font-medium hover:bg-surface-hover bg-transparent border-none" @click="saveCurrentDraft">保存当前草稿</button>
             </div>
-            <div class="draft-list-container">
+            <div class="max-h-[400px] overflow-y-auto border border-border rounded-md">
               <div v-if="!draftStore.drafts.length" class="empty-state">
                 <p>暂无草稿</p>
                 <button type="button" class="empty-state-action" @click="createDraft">创建第一个草稿</button>
@@ -67,17 +74,17 @@ function deleteDraft(id: number) {
               <div
                 v-for="draft in draftStore.drafts"
                 :key="draft.id"
-                class="draft-item"
+                class="flex items-center justify-between gap-3 px-4 py-3 border-b border-border last:border-b-0"
               >
-                <div class="draft-item-info">
-                  <div class="draft-item-name">{{ draft.name }}</div>
-                  <div class="draft-item-meta">
+                <div class="flex-1 min-w-0">
+                  <div class="font-semibold mb-1 truncate">{{ draft.name }}</div>
+                  <div class="text-xs text-text-tertiary">
                     更新于：{{ new Date(draft.updatedAt || draft.createdAt).toLocaleString('zh-CN') }}
                   </div>
                 </div>
-                <div class="draft-item-actions">
-                  <button type="button" @click="loadDraft(draft.id)">加载</button>
-                  <button type="button" @click="deleteDraft(draft.id)">删除</button>
+                <div class="flex gap-2 shrink-0">
+                  <button type="button" class="text-xs px-2 py-1 rounded-md hover:bg-surface-hover bg-transparent border-none" @click="loadDraft(draft.id)">加载</button>
+                  <button type="button" class="text-xs px-2 py-1 rounded-md hover:bg-surface-hover bg-transparent border-none" @click="deleteDraft(draft.id)">删除</button>
                 </div>
               </div>
             </div>

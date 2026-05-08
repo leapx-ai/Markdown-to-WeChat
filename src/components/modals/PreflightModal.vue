@@ -30,28 +30,35 @@ async function confirmCopy() {
     <Transition name="modal">
       <div v-if="isOpen" class="modal-backdrop" @click.self="close">
         <section class="modal" role="dialog" aria-modal="true">
-          <div class="modal-header">
+          <div class="flex items-start justify-between gap-4 shrink-0 px-5 pt-5 pb-4">
             <div>
-              <p class="eyebrow">Preflight</p>
-              <h2>复制前预检</h2>
+              <p class="text-[11px] font-semibold tracking-widest uppercase text-text-tertiary mb-0.5">Preflight</p>
+              <h2 class="text-lg font-semibold tracking-tight leading-tight">复制前预检</h2>
             </div>
-            <button type="button" class="icon-button" aria-label="关闭" @click="close">×</button>
+            <button
+              type="button"
+              class="w-8 h-8 flex items-center justify-center rounded-md text-text-tertiary hover:text-text hover:bg-surface-hover transition-colors text-xl border-none bg-transparent"
+              aria-label="关闭"
+              @click="close"
+            >
+              ×
+            </button>
           </div>
-          <div class="preflight-summary">
-            <div class="preflight-pill">
-              <strong>{{ counts.danger }}</strong>
-              <span>严重</span>
+          <div class="grid grid-cols-3 gap-3 px-5 pb-4">
+            <div class="p-3.5 rounded-md bg-bg text-center">
+              <strong class="block text-2xl font-semibold tabular-nums tracking-tight leading-tight">{{ counts.danger }}</strong>
+              <span class="block mt-1 text-[11px] font-semibold tracking-widest uppercase text-text-tertiary">严重</span>
             </div>
-            <div class="preflight-pill">
-              <strong>{{ counts.warn }}</strong>
-              <span>提醒</span>
+            <div class="p-3.5 rounded-md bg-bg text-center">
+              <strong class="block text-2xl font-semibold tabular-nums tracking-tight leading-tight">{{ counts.warn }}</strong>
+              <span class="block mt-1 text-[11px] font-semibold tracking-widest uppercase text-text-tertiary">提醒</span>
             </div>
-            <div class="preflight-pill">
-              <strong>{{ counts.info }}</strong>
-              <span>信息</span>
+            <div class="p-3.5 rounded-md bg-bg text-center">
+              <strong class="block text-2xl font-semibold tabular-nums tracking-tight leading-tight">{{ counts.info }}</strong>
+              <span class="block mt-1 text-[11px] font-semibold tracking-widest uppercase text-text-tertiary">信息</span>
             </div>
           </div>
-          <div class="preflight-list">
+          <div class="px-5 pb-4 overflow-y-auto">
             <div
               v-for="(w, i) in warnings"
               :key="i"
@@ -64,9 +71,13 @@ async function confirmCopy() {
               <p>预检通过，当前内容没有明显的公众号兼容性风险</p>
             </div>
           </div>
-          <div class="modal-actions">
-            <button type="button" @click="close">取消</button>
-            <button type="button" class="primary" @click="confirmCopy">
+          <div class="flex justify-end gap-2.5 shrink-0 px-5 pt-4 pb-5 border-t border-border-subtle dark:border-border">
+            <button type="button" class="h-9 px-3.5 rounded-md text-[13px] font-medium hover:bg-surface-hover bg-transparent border-none" @click="close">取消</button>
+            <button
+              type="button"
+              class="h-9 px-3.5 rounded-md text-[13px] font-medium bg-accent text-accent-contrast hover:bg-accent-hover border-none"
+              @click="confirmCopy"
+            >
               {{ counts.danger ? '仍然复制' : '继续复制' }}
             </button>
           </div>

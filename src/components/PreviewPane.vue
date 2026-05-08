@@ -15,13 +15,20 @@ const previewStyle = computed(() => ({
 </script>
 
 <template>
-  <section class="preview-pane" aria-label="微信公众号预览区">
-    <div class="pane-title">
-      <strong>微信预览</strong>
+  <section
+    class="animate-panel-2 flex flex-col min-h-0 rounded-2xl overflow-hidden bg-bg shadow-none"
+    aria-label="微信公众号预览区"
+  >
+    <div class="flex items-center justify-between gap-3 h-11 px-4 shrink-0 text-[11px] font-semibold tracking-widest uppercase text-text-tertiary border-b border-border-subtle dark:border-border">
+      <strong class="text-text-secondary font-semibold">微信预览</strong>
       <span>复制时会包含内联样式</span>
     </div>
-    <div class="phone-frame">
-      <article class="wechat-preview" :style="previewStyle" v-html="html" />
+    <div class="flex-1 min-h-0 overflow-auto p-6 flex items-start justify-center">
+      <article
+        class="w-full min-h-[calc(100%-48px)] p-8 pb-10 bg-surface rounded-2xl shadow-md dark:shadow-lg break-words origin-top"
+        :style="previewStyle"
+        v-html="html"
+      />
     </div>
   </section>
 </template>

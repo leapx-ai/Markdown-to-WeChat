@@ -65,19 +65,27 @@ onMounted(() => {
 
 <template>
   <AppHeader />
-  <main class="workspace" :class="{ 'focus-preview': settingsStore.isFocusPreview }">
+  <main
+    class="grid gap-4 p-4 min-h-0"
+    :class="[
+      settingsStore.isFocusPreview
+        ? 'grid-cols-[minmax(360px,1fr)_minmax(280px,320px)]'
+        : 'grid-cols-[minmax(320px,1fr)_minmax(360px,520px)_minmax(240px,280px)]',
+    ]"
+    style="height: calc(100dvh - 64px)"
+  >
     <EditorPane v-model="content" />
     <PreviewPane :html="renderedHtml" />
     <InspectorPane :stats="stats" :warnings="warnings" />
   </main>
 
   <Teleport to="body">
-    <TransitionGroup name="toast" tag="div" class="toast-container">
+    <TransitionGroup name="toast" tag="div" class="fixed bottom-5 right-5 z-[1000] flex flex-col gap-2">
       <div
         v-for="toast in ui.toasts"
         :key="toast.id"
-        class="toast"
-        :class="`toast-${toast.type}`"
+        class="px-5 py-3 rounded-md bg-surface shadow-xl text-sm font-medium max-w-[360px] leading-relaxed"
+        :class="toast.type === 'success' ? 'text-success' : 'text-danger'"
       >
         {{ toast.message }}
       </div>
@@ -89,26 +97,3 @@ onMounted(() => {
   <ThemeEditorModal />
   <ShortcutModal />
 </template>
-
-<style>
-.toast-container {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.toast-enter-active,
-.toast-leave-active {
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.toast-enter-from,
-.toast-leave-to {
-  opacity: 0;
-  transform: translateY(12px);
-}
-</style>
