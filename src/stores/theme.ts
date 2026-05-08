@@ -12,7 +12,7 @@ export const useThemeStore = defineStore('theme', () => {
   const currentThemeKey = computed({
     get: () => {
       const key = storedTheme.value
-      return themes[key] ? key : 'classic'
+      return (themes[key] || key === 'custom') ? key : 'classic'
     },
     set: (key: string) => {
       if (key !== 'night') {

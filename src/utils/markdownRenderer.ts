@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type { ThemeBase, CodeTheme } from '@/types'
 
 export function escapeHtml(value: string): string {
@@ -178,7 +177,6 @@ function paragraphStyle(theme: ThemeBase): Record<string, string | number> {
     color: theme.color,
     fontSize: `${theme.fontSize || 16}px`,
     lineHeight: themeLineHeight(theme, 1.85),
-    letterSpacing: '0',
   }
 }
 
@@ -198,7 +196,6 @@ function h1Style(theme: ThemeBase): Record<string, string | number | undefined> 
     fontSize: `${baseSize + 8}px`,
     lineHeight: '1.36',
     fontWeight: '700',
-    letterSpacing: '0',
   }
 
   if (theme.h1Mode === 'center') {
@@ -304,32 +301,21 @@ interface ListNode {
 export interface RenderAppendix {
   followEnabled?: boolean
   followName?: string
-  readMoreEnabled?: boolean
-  readMoreUrl?: string
+  followSlogan?: string
 }
 
 function renderAppendix(theme: ThemeBase, appendix?: RenderAppendix): string {
-  if (!appendix) return ''
-  let html = ''
-
-  if (appendix.followEnabled) {
-    const name = escapeHtml(appendix.followName || '公众号名称')
-    html += `
-<section style="margin:28px 0 0;padding:18px 16px;border-radius:8px;background:${theme.bgSoft};text-align:center;">
-  <p style="margin:0 0 8px;color:${theme.muted};font-size:13px;line-height:1.5;">喜欢这篇文章？</p>
-  <p style="margin:0 0 12px;color:${theme.color};font-size:15px;font-weight:600;line-height:1.4;">关注「${name}」获取更多精彩内容</p>
-  <div style="display:inline-block;padding:8px 20px;border-radius:6px;background:${theme.accent};color:#fff;font-size:13px;font-weight:500;">点击关注</div>
-</section>`
-  }
-
-  if (appendix.readMoreEnabled && appendix.readMoreUrl) {
-    html += `
-<section style="margin:18px 0 0;padding:12px 0 0;border-top:1px solid ${theme.border};text-align:right;">
-  <a href="${escapeHtml(appendix.readMoreUrl)}" style="color:${theme.accent};font-size:13px;font-weight:500;text-decoration:none;">阅读原文 →</a>
-</section>`
-  }
-
-  return html
+  if (!appendix?.followEnabled) return ''
+  const name = escapeHtml(appendix.followName || '公众号名称')
+  const slogan = escapeHtml(appendix.followSlogan || '感谢阅读，觉得有帮助可以分享给朋友')
+  return `
+<p style="margin:28px 0 0;padding:0;border-top:3px solid ${theme.accent};"></p>
+<p style="margin:0;padding:20px 16px 4px;background:${theme.bgSoft};text-align:center;">
+  <span style="color:${theme.muted};font-size:13px;line-height:1.6;">${slogan}</span>
+</p>
+<p style="margin:0;padding:4px 16px 20px;background:${theme.bgSoft};text-align:center;">
+  <strong style="color:${theme.accent};font-size:18px;line-height:1.4;letter-spacing:1px;">${name}</strong>
+</p>`
 }
 
 export function renderMarkdown(markdown: string, theme: ThemeBase, codeTheme: CodeTheme, appendix?: RenderAppendix): string {
@@ -669,7 +655,6 @@ export function renderMarkdown(markdown: string, theme: ThemeBase, codeTheme: Co
       borderRadius: theme.canvas ? '8px' : undefined,
       fontSize: `${theme.fontSize || 16}px`,
       lineHeight: themeLineHeight(theme, 1.8),
-      letterSpacing: '0',
     },
   )
 }

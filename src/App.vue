@@ -85,7 +85,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <AppHeader :rendered-html="renderedHtml" :warnings="warnings" :stats="stats" />
+  <AppHeader :rendered-html="renderedHtml" :warnings="warnings" :stats="stats" @export-html="handleExport" />
   <!-- Overlay to close assistant panel on outside click -->
   <div
     v-show="ui.showSettings"
@@ -123,11 +123,4 @@ onMounted(() => {
   <PreflightModal :warnings="warnings" :counts="preflightCounts" :html="renderedHtml" />
   <ThemeEditorModal />
 
-  <footer class="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-end px-5 h-8 text-[11px] text-text-tertiary pointer-events-none">
-    <a
-      href="#"
-      class="pointer-events-auto hover:text-text transition-colors"
-      @click.prevent="handleExport"
-    >导出 HTML</a>
-  </footer>
 </template>

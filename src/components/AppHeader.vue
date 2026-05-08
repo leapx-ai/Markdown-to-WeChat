@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useThemeStore } from '@/stores/theme'
 import { useUiStore } from '@/stores/ui'
 import { useClipboard } from '@/composables/useClipboard'
+import { codeThemes } from '@/config/themes'
 import AppIcon from '@/components/ui/AppIcon.vue'
 import type { WarningItem, MarkdownStats } from '@/types'
 
@@ -12,6 +13,8 @@ const props = defineProps<{
   stats: MarkdownStats
 }>()
 
+const emit = defineEmits<{ 'exportHtml': [] }>()
+
 const themeStore = useThemeStore()
 const ui = useUiStore()
 const { copyRenderedHtml } = useClipboard()
@@ -20,9 +23,14 @@ const hasBlockingWarnings = computed(() => props.warnings.some(w => w.level === 
 const hasWarnings = computed(() => props.warnings.length > 0)
 
 const themeList = computed(() => Object.entries(themeStore.allThemes))
+const codeThemeList = computed(() => Object.entries(codeThemes))
 
 function selectTheme(key: string) {
   themeStore.currentThemeKey = key
+}
+
+function selectCodeTheme(key: string) {
+  themeStore.currentCodeThemeKey = key
 }
 
 async function handleCopy() {
@@ -37,11 +45,15 @@ async function handleCopy() {
   }
   await copyRenderedHtml(props.renderedHtml)
 }
+
+function handleExport() {
+  emit('exportHtml')
+}
 </script>
 
 <template>
   <header
-    class="flex items-center justify-between gap-4 h-16 px-5 sticky top-0 z-50 backdrop-blur-xl bg-white/72 border-b border-border-subtle"
+    class="flex items-center justify-between gap-4 h-16 px-5 sticky top-0 z-50 backdrop-blur-xl bg-white/85 border-b border-border-subtle shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
   >
     <div>
       <p class="text-[11px] font-semibold tracking-widest uppercase text-text-tertiary mb-0.5">
@@ -74,28 +86,61 @@ async function handleCopy() {
       </span>
     </div>
 
-    <div class="flex items-center gap-3">
-      <div class="flex items-center gap-1 bg-bg/60 border border-border-subtle rounded-xl p-1">
-        <button
-          v-for="[key, theme] in themeList"
-          :key="key"
-          type="button"
-          :title="theme.name"
-          class="w-7 h-7 rounded-lg border-2 transition-all active:scale-90 relative overflow-hidden"
-          :class="themeStore.currentThemeKey === key
-            ? 'border-white shadow-md scale-110'
-            : 'border-white/40 hover:border-white hover:scale-105 shadow-sm'
-          "
-          :style="{ background: theme.base.accent }"
-          @click="selectTheme(key)"
-        >
-          <span
-            v-if="themeStore.currentThemeKey === key"
-            class="absolute inset-0 flex items-center justify-center bg-black/20"
+    <div class="flex items-center gap-2.5">
+      <div class="flex items-center gap-1.5">
+        <span class="text-[10px] text-text-tertiary font-medium tracking-wider">主题</span>
+        <div class="flex items-center gap-0.5 bg-bg/60 border border-border-subtle rounded-xl p-1">
+          <button
+            v-for="[key, theme] in themeList"
+            :key="key"
+            type="button"
+            :title="theme.name"
+            class="w-7 h-7 rounded-lg border-2 transition-all active:scale-90 relative overflow-hidden"
+            :class="themeStore.currentThemeKey === key
+              ? 'border-white shadow-md scale-110'
+              : 'border-white/40 hover:border-white hover:scale-105 shadow-sm'
+            "
+            :style="{ background: theme.base.accent }"
+            @click="selectTheme(key)"
           >
-            <AppIcon name="check" :size="12" class="text-white" />
-          </span>
-        </button>
+            <span
+              v-if="themeStore.currentThemeKey === key"
+              class="absolute inset-0 flex items-center justify-center bg-black/20"
+            >
+              <AppIcon name="check" :size="12" class="text-white" />
+            </span>
+          </button>
+        </div>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <span class="text-[10px] text-text-tertiary font-medium tracking-wider">代码</span>
+        <div class="flex items-center gap-0.5 bg-bg/60 border border-border-subtle rounded-xl p-1">
+          <button
+            v-for="[key, theme] in codeThemeList"
+            :key="key"
+            type="button"
+            :title="theme.name"
+            class="w-7 h-7 rounded-lg border-2 transition-all active:scale-90 relative overflow-hidden"
+            :class="themeStore.currentCodeThemeKey === key
+              ? 'border-white shadow-md scale-110'
+              : 'border-white/40 hover:border-white hover:scale-105 shadow-sm'
+            "
+            :style="{ background: theme.background }"
+            @click="selectCodeTheme(key)"
+          >
+            <span
+              v-if="themeStore.currentCodeThemeKey === key"
+              class="absolute inset-0 flex items-center justify-center"
+              :style="{ background: theme.keyword, opacity: '0.18' }"
+            />
+            <span
+              v-if="themeStore.currentCodeThemeKey === key"
+              class="absolute inset-0 flex items-center justify-center"
+            >
+              <AppIcon name="check" :size="12" :style="{ color: theme.color }" />
+            </span>
+          </button>
+        </div>
       </div>
       <button
         type="button"
@@ -110,6 +155,14 @@ async function handleCopy() {
         >
           {{ warnings.length }}
         </span>
+      </button>
+      <button
+        type="button"
+        class="h-9 px-3 rounded-xl text-[13px] font-medium bg-surface text-text border border-border hover:bg-surface-hover active:scale-[0.96] transition-all inline-flex items-center gap-1.5"
+        @click="handleExport"
+      >
+        <AppIcon name="download" :size="14" />
+        导出
       </button>
       <button
         type="button"

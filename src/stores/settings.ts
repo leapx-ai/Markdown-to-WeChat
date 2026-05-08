@@ -10,13 +10,11 @@ export const useSettingsStore = defineStore('settings', () => {
   const wechatElements = useStorage<{
     followEnabled: boolean
     followName: string
-    readMoreEnabled: boolean
-    readMoreUrl: string
+    followSlogan: string
   }>(WECHAT_ELEMENTS_KEY, {
     followEnabled: false,
     followName: '',
-    readMoreEnabled: false,
-    readMoreUrl: '',
+    followSlogan: '',
   })
 
   const previewZoomComputed = computed({

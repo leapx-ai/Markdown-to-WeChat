@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useUiStore } from '@/stores/ui'
 import { useThemeStore } from '@/stores/theme'
 import AppIcon from '@/components/ui/AppIcon.vue'
@@ -17,6 +17,7 @@ const h1Mode = ref<'underline' | 'center' | 'panel' | 'plain'>('underline')
 const headingMode = ref<'bar' | 'chip' | 'plain'>('bar')
 const quoteMode = ref<'bar' | 'panel' | 'soft'>('bar')
 const fontFamily = ref("-apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif")
+const colorInputRef = ref<HTMLInputElement | null>(null)
 
 const presetColors = ['#07c160', '#111111', '#006d77', '#2468a2', '#b14f2a', '#8ab4a6', '#dc2626', '#2563eb', '#f59e0b', '#7c3aed']
 
@@ -49,7 +50,7 @@ function close() {
   ui.closeModal('themeEditor')
 }
 
-function save() {
+function applyToStore() {
   themeStore.setCustomTheme({
     fontFamily: fontFamily.value,
     color: '#2f3033',
@@ -66,6 +67,9 @@ function save() {
     width: width.value,
   })
   themeStore.currentThemeKey = 'custom'
+}
+
+function finish() {
   close()
 }
 
@@ -78,7 +82,78 @@ function reset() {
   headingMode.value = 'bar'
   quoteMode.value = 'bar'
   fontFamily.value = "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif"
+  applyToStore()
 }
+
+function loadFromCurrentTheme() {
+  const base = themeStore.currentTheme.base
+  accent.value = base.accent || '#07c160'
+  fontSize.value = base.fontSize || 16
+  lineHeight.value = base.lineHeight || 1.8
+  width.value = base.width || 420
+  h1Mode.value = (base.h1Mode as typeof h1Mode.value) || 'underline'
+  headingMode.value = (base.headingMode as typeof headingMode.value) || 'bar'
+  quoteMode.value = (base.quoteMode as typeof quoteMode.value) || 'bar'
+  fontFamily.value = base.fontFamily || "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif"
+}
+
+// Snapshot to support cancel
+let snapshot: {
+  accent: string
+  fontSize: number
+  lineHeight: number
+  width: number
+  h1Mode: string
+  headingMode: string
+  quoteMode: string
+  fontFamily: string
+  prevThemeKey: string
+} | null = null
+
+watch(isOpen, (open) => {
+  if (open) {
+    loadFromCurrentTheme()
+    snapshot = {
+      accent: accent.value,
+      fontSize: fontSize.value,
+      lineHeight: lineHeight.value,
+      width: width.value,
+      h1Mode: h1Mode.value,
+      headingMode: headingMode.value,
+      quoteMode: quoteMode.value,
+      fontFamily: fontFamily.value,
+      prevThemeKey: themeStore.currentThemeKey,
+    }
+  }
+})
+
+watch(
+  [accent, fontSize, lineHeight, width, h1Mode, headingMode, quoteMode, fontFamily],
+  () => {
+    applyToStore()
+  },
+  { deep: true },
+)
+
+function cancel() {
+  if (snapshot) {
+    accent.value = snapshot.accent
+    fontSize.value = snapshot.fontSize
+    lineHeight.value = snapshot.lineHeight
+    width.value = snapshot.width
+    h1Mode.value = snapshot.h1Mode as 'underline' | 'center' | 'panel' | 'plain'
+    headingMode.value = snapshot.headingMode as 'bar' | 'chip' | 'plain'
+    quoteMode.value = snapshot.quoteMode as 'bar' | 'panel' | 'soft'
+    fontFamily.value = snapshot.fontFamily
+    themeStore.currentThemeKey = snapshot.prevThemeKey
+    applyToStore()
+  }
+  close()
+}
+
+function setH1Mode(v: string) { h1Mode.value = v as typeof h1Mode.value }
+function setHeadingMode(v: string) { headingMode.value = v as typeof headingMode.value }
+function setQuoteMode(v: string) { quoteMode.value = v as typeof quoteMode.value }
 
 const previewHtml = computed(() => {
   const lh = lineHeight.value
@@ -128,8 +203,23 @@ const previewHtml = computed(() => {
 <blockquote style="${quoteStyle}">
   这是引用块示例，使用主色作为左侧边框。
 </blockquote>
-<pre style="margin:18px 0;padding:16px;background:#f8fafc;border-radius:8px;overflow-x:auto;border:1px solid #e4e8ee;"><code style="font-family:Menlo,Monaco,Consolas,monospace;font-size:13px;line-height:1.7;color:#2f3033;">function hello() {
-  console.log('Hello World!')
+<pre style="margin:18px 0;padding:16px;background:#f8fafc;border-radius:8px;overflow-x:auto;border:1px solid #e4e8ee;"><code style="font-family:Menlo,Monaco,Consolas,monospace;font-size:13px;line-height:1.7;color:#2f3033;">// 优雅的排版，从细节开始
+function renderArticle(content, theme) {
+  const { fontSize, lineHeight, accent } = theme;
+
+  // 标题层级清晰，阅读更有节奏
+  const headings = content.match(/^#{1,4}\s+.+$/gm) || [];
+
+  // 中文字符与西文/数字之间自动添加间隙
+  const spaced = content
+    .replace(/([一-鿿])([a-zA-Z0-9])/g, '$1 $2')
+    .replace(/([a-zA-Z0-9])([一-鿿])/g, '$1 $2');
+
+  return {
+    wordCount: spaced.length,
+    headings: headings.length,
+    styled: '<article style="line-height:' + lineHeight + ';">' + spaced + '</article>',
+  };
 }</code></pre>
 </div>`
 })
@@ -161,7 +251,7 @@ const previewHtml = computed(() => {
               <!-- Color -->
               <div class="space-y-2.5">
                 <span class="text-xs font-semibold text-text-secondary">主色</span>
-                <div class="flex flex-wrap gap-2">
+                <div class="flex flex-wrap gap-2 items-center">
                   <button
                     v-for="c in presetColors"
                     :key="c"
@@ -171,25 +261,33 @@ const previewHtml = computed(() => {
                     :style="{ background: c }"
                     @click="accent = c"
                   />
-                  <label class="w-7 h-7 rounded-full border-2 border-border-subtle hover:border-border transition-all cursor-pointer relative overflow-hidden">
-                    <input v-model="accent" type="color" class="absolute -top-2 -left-2 w-12 h-12 p-0 border-0 cursor-pointer" />
-                  </label>
+                  <button
+                    type="button"
+                    class="w-7 h-7 rounded-full border-2 border-border-subtle hover:border-border transition-all relative overflow-hidden"
+                    :style="{ background: accent }"
+                    @click="colorInputRef?.click()"
+                  >
+                    <span class="absolute inset-0 flex items-center justify-center">
+                      <AppIcon name="palette" :size="12" class="text-white mix-blend-difference" />
+                    </span>
+                  </button>
+                  <input ref="colorInputRef" v-model="accent" type="color" class="absolute opacity-0 w-0 h-0" />
+                  <span class="text-xs font-mono text-text-tertiary ml-1">{{ accent }}</span>
                 </div>
-                <span class="text-xs font-mono text-text-tertiary">{{ accent }}</span>
               </div>
 
               <!-- Typography -->
               <div class="space-y-2.5">
                 <span class="text-xs font-semibold text-text-secondary">字体</span>
-                <div class="flex gap-1.5">
+                <div class="flex gap-0.5 bg-bg rounded-xl p-1">
                   <button
                     v-for="opt in fontOptions"
                     :key="opt.value"
                     type="button"
-                    class="flex-1 h-8 rounded-lg text-[12px] font-medium border transition-all active:scale-95"
+                    class="flex-1 h-8 rounded-lg text-[12px] font-medium transition-all active:scale-95"
                     :class="fontFamily === opt.value
-                      ? 'border-accent bg-accent/10 text-accent'
-                      : 'border-border-subtle bg-transparent text-text-secondary hover:border-border hover:bg-surface-hover'"
+                      ? 'bg-surface text-text shadow-sm font-semibold'
+                      : 'text-text-tertiary hover:text-text'"
                     @click="fontFamily = opt.value"
                   >
                     {{ opt.label }}
@@ -204,7 +302,14 @@ const previewHtml = computed(() => {
                     <span class="text-xs font-semibold text-text-secondary">正文字号</span>
                     <span class="text-xs font-mono text-text-tertiary bg-bg px-1.5 py-0.5 rounded">{{ fontSize }}px</span>
                   </div>
-                  <input v-model="fontSize" type="range" min="14" max="20" class="w-full accent-slider" />
+                  <input
+                    :value="fontSize"
+                    type="range"
+                    min="14"
+                    max="20"
+                    class="w-full accent-slider"
+                    @input="fontSize = Number(($event.target as HTMLInputElement).value)"
+                  />
                   <div class="flex justify-between text-[10px] text-text-tertiary px-0.5">
                     <span>14</span>
                     <span>20</span>
@@ -216,7 +321,15 @@ const previewHtml = computed(() => {
                     <span class="text-xs font-semibold text-text-secondary">行高</span>
                     <span class="text-xs font-mono text-text-tertiary bg-bg px-1.5 py-0.5 rounded">{{ lineHeight }}</span>
                   </div>
-                  <input v-model="lineHeight" type="range" min="1.5" max="2.2" step="0.05" class="w-full accent-slider" />
+                  <input
+                    :value="lineHeight"
+                    type="range"
+                    min="1.5"
+                    max="2.2"
+                    step="0.05"
+                    class="w-full accent-slider"
+                    @input="lineHeight = Number(($event.target as HTMLInputElement).value)"
+                  />
                   <div class="flex justify-between text-[10px] text-text-tertiary px-0.5">
                     <span>1.5</span>
                     <span>2.2</span>
@@ -228,7 +341,14 @@ const previewHtml = computed(() => {
                     <span class="text-xs font-semibold text-text-secondary">内容宽度</span>
                     <span class="text-xs font-mono text-text-tertiary bg-bg px-1.5 py-0.5 rounded">{{ width }}px</span>
                   </div>
-                  <input v-model="width" type="range" min="360" max="600" class="w-full accent-slider" />
+                  <input
+                    :value="width"
+                    type="range"
+                    min="360"
+                    max="600"
+                    class="w-full accent-slider"
+                    @input="width = Number(($event.target as HTMLInputElement).value)"
+                  />
                   <div class="flex justify-between text-[10px] text-text-tertiary px-0.5">
                     <span>360</span>
                     <span>600</span>
@@ -240,16 +360,16 @@ const previewHtml = computed(() => {
               <div class="space-y-3.5">
                 <div class="space-y-2">
                   <span class="text-xs font-semibold text-text-secondary">一级标题样式</span>
-                  <div class="flex gap-1">
+                  <div class="flex gap-0.5 bg-bg rounded-xl p-1">
                     <button
                       v-for="m in h1Modes"
                       :key="m.value"
                       type="button"
-                      class="flex-1 h-8 rounded-lg text-[12px] font-medium border transition-all active:scale-95"
+                      class="flex-1 h-8 rounded-lg text-[12px] font-medium transition-all active:scale-95"
                       :class="h1Mode === m.value
-                        ? 'border-accent bg-accent/10 text-accent'
-                        : 'border-border-subtle bg-transparent text-text-secondary hover:border-border hover:bg-surface-hover'"
-                      @click="h1Mode = m.value as any"
+                        ? 'bg-surface text-text shadow-sm font-semibold'
+                        : 'text-text-tertiary hover:text-text'"
+                      @click="setH1Mode(m.value)"
                     >
                       {{ m.label }}
                     </button>
@@ -258,16 +378,16 @@ const previewHtml = computed(() => {
 
                 <div class="space-y-2">
                   <span class="text-xs font-semibold text-text-secondary">二级以上标题样式</span>
-                  <div class="flex gap-1">
+                  <div class="flex gap-0.5 bg-bg rounded-xl p-1">
                     <button
                       v-for="m in headingModes"
                       :key="m.value"
                       type="button"
-                      class="flex-1 h-8 rounded-lg text-[12px] font-medium border transition-all active:scale-95"
+                      class="flex-1 h-8 rounded-lg text-[12px] font-medium transition-all active:scale-95"
                       :class="headingMode === m.value
-                        ? 'border-accent bg-accent/10 text-accent'
-                        : 'border-border-subtle bg-transparent text-text-secondary hover:border-border hover:bg-surface-hover'"
-                      @click="headingMode = m.value as any"
+                        ? 'bg-surface text-text shadow-sm font-semibold'
+                        : 'text-text-tertiary hover:text-text'"
+                      @click="setHeadingMode(m.value)"
                     >
                       {{ m.label }}
                     </button>
@@ -276,16 +396,16 @@ const previewHtml = computed(() => {
 
                 <div class="space-y-2">
                   <span class="text-xs font-semibold text-text-secondary">引用块样式</span>
-                  <div class="flex gap-1">
+                  <div class="flex gap-0.5 bg-bg rounded-xl p-1">
                     <button
                       v-for="m in quoteModes"
                       :key="m.value"
                       type="button"
-                      class="flex-1 h-8 rounded-lg text-[12px] font-medium border transition-all active:scale-95"
+                      class="flex-1 h-8 rounded-lg text-[12px] font-medium transition-all active:scale-95"
                       :class="quoteMode === m.value
-                        ? 'border-accent bg-accent/10 text-accent'
-                        : 'border-border-subtle bg-transparent text-text-secondary hover:border-border hover:bg-surface-hover'"
-                      @click="quoteMode = m.value as any"
+                        ? 'bg-surface text-text shadow-sm font-semibold'
+                        : 'text-text-tertiary hover:text-text'"
+                      @click="setQuoteMode(m.value)"
                     >
                       {{ m.label }}
                     </button>
@@ -307,8 +427,9 @@ const previewHtml = computed(() => {
           </div>
 
           <div class="flex justify-end gap-2.5 shrink-0 px-6 pt-4 pb-6 border-t border-border-subtle dark:border-border">
+            <button type="button" class="h-9 px-4 rounded-xl text-[13px] font-medium bg-surface text-text border border-border hover:bg-surface-hover active:scale-[0.96] transition-all inline-flex items-center justify-center gap-2" @click="cancel">取消</button>
             <button type="button" class="h-9 px-4 rounded-xl text-[13px] font-medium bg-surface text-text border border-border hover:bg-surface-hover active:scale-[0.96] transition-all inline-flex items-center justify-center gap-2" @click="reset">重置</button>
-            <button type="button" class="h-9 px-4 rounded-xl text-[13px] font-semibold bg-[#18181b] !text-white border border-[#18181b] hover:bg-[#27272a] hover:border-[#27272a] active:scale-[0.96] transition-all inline-flex items-center justify-center gap-2 shadow-sm" @click="save">保存并使用</button>
+            <button type="button" class="h-9 px-4 rounded-xl text-[13px] font-semibold bg-[#18181b] !text-white border border-[#18181b] hover:bg-[#27272a] hover:border-[#27272a] active:scale-[0.96] transition-all inline-flex items-center justify-center gap-2 shadow-sm" @click="finish">完成</button>
           </div>
         </section>
       </div>

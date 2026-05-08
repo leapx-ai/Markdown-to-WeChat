@@ -59,7 +59,7 @@ watch(() => props.modelValue, (v) => {
 </script>
 
 <template>
-  <section class="animate-panel-1 flex flex-col min-h-0 rounded-2xl bg-surface shadow-sm overflow-hidden dark:border dark:border-border" aria-label="Markdown 编辑区">
+  <section class="animate-panel-1 flex flex-col min-h-0 rounded-2xl bg-surface shadow-sm overflow-hidden border border-border-subtle dark:border dark:border-border" aria-label="Markdown 编辑区">
     <div class="flex items-center justify-between gap-3 h-11 px-4 shrink-0 text-[11px] font-semibold tracking-widest uppercase text-text-tertiary border-b border-border-subtle dark:border-border">
       <strong class="text-text-secondary font-semibold">Markdown</strong>
       <Transition name="fade">

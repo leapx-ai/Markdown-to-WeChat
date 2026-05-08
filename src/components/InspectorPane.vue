@@ -69,11 +69,11 @@ function locateWarning(type?: string) {
     unclosedCode: ['```'],
     multiH1: ['# '],
     deepHeading: ['##### '],
-    externalLink: ['http'],
-    manyTables: ['|'],
+    externalLink: ['](http'],
+    manyTables: ['| '],
     longCode: ['```'],
     fewHeadings: ['# '],
-    noHeading: ['# '],
+    noHeading: [],
   }
   const candidates = type ? searches[type] : []
   if (!candidates?.length) return
@@ -204,15 +204,15 @@ function locateWarning(type?: string) {
         </div>
         <div class="mt-3">
           <span class="block text-xs font-medium text-text-secondary mb-1.5">代码高亮</span>
-          <div class="flex gap-1.5">
+          <div class="flex gap-0.5 bg-bg rounded-xl p-1">
             <button
               v-for="[key, theme] in codeThemeList"
               :key="key"
               type="button"
-              class="flex-1 h-8 rounded-lg text-[12px] font-medium border transition-all active:scale-95"
+              class="flex-1 h-8 rounded-lg text-[12px] font-medium transition-all active:scale-95"
               :class="themeStore.currentCodeThemeKey === key
-                ? 'border-accent bg-accent/10 text-accent'
-                : 'border-border-subtle bg-transparent text-text-secondary hover:border-border hover:bg-surface-hover'"
+                ? 'bg-surface text-text shadow-sm font-semibold'
+                : 'text-text-tertiary hover:text-text'"
               @click="selectCodeTheme(key)"
             >
               {{ theme.name }}
@@ -238,15 +238,15 @@ function locateWarning(type?: string) {
           <h2 class="text-[11px] font-semibold tracking-widest uppercase text-text-tertiary">预览布局</h2>
         </div>
         <span class="block text-xs font-medium text-text-secondary mb-1.5">缩放</span>
-        <div class="flex gap-1.5">
+        <div class="flex gap-0.5 bg-bg rounded-xl p-1">
           <button
             v-for="opt in zoomOptions"
             :key="opt.value"
             type="button"
-            class="flex-1 h-8 rounded-lg text-[12px] font-medium border transition-all active:scale-95"
+            class="flex-1 h-8 rounded-lg text-[12px] font-medium transition-all active:scale-95"
             :class="String(settingsStore.previewZoom) === opt.value
-              ? 'border-accent bg-accent/10 text-accent'
-              : 'border-border-subtle bg-transparent text-text-secondary hover:border-border hover:bg-surface-hover'"
+              ? 'bg-surface text-text shadow-sm font-semibold'
+              : 'text-text-tertiary hover:text-text'"
             @click="settingsStore.previewZoom = opt.value"
           >
             {{ opt.label }}
@@ -262,7 +262,7 @@ function locateWarning(type?: string) {
           </span>
           <h2 class="text-[11px] font-semibold tracking-widest uppercase text-text-tertiary">公众号元素</h2>
         </div>
-        <div class="space-y-3.5">
+        <div class="space-y-3">
           <label class="flex items-center gap-2.5 text-[13px] text-text-secondary cursor-pointer">
             <input
               type="checkbox"
@@ -279,22 +279,13 @@ function locateWarning(type?: string) {
             class="w-full h-9 px-3 text-[13px] rounded-lg border border-border bg-surface text-text placeholder:text-text-tertiary focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
             @input="e => settingsStore.updateWechatElements({ followName: (e.target as HTMLInputElement).value })"
           />
-
-          <label class="flex items-center gap-2.5 text-[13px] text-text-secondary cursor-pointer">
-            <input
-              type="checkbox"
-              :checked="settingsStore.wechatElements.readMoreEnabled"
-              @change="e => settingsStore.updateWechatElements({ readMoreEnabled: (e.target as HTMLInputElement).checked })"
-            />
-            <span>阅读原文</span>
-          </label>
           <input
-            v-if="settingsStore.wechatElements.readMoreEnabled"
-            :value="settingsStore.wechatElements.readMoreUrl"
+            v-if="settingsStore.wechatElements.followEnabled"
+            :value="settingsStore.wechatElements.followSlogan"
             type="text"
-            placeholder="https://..."
+            placeholder="引导语（如：感谢阅读，觉得有帮助可以分享给朋友）"
             class="w-full h-9 px-3 text-[13px] rounded-lg border border-border bg-surface text-text placeholder:text-text-tertiary focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
-            @input="e => settingsStore.updateWechatElements({ readMoreUrl: (e.target as HTMLInputElement).value })"
+            @input="e => settingsStore.updateWechatElements({ followSlogan: (e.target as HTMLInputElement).value })"
           />
         </div>
       </section>
