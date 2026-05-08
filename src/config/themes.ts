@@ -1,5 +1,13 @@
 import type { Theme, CodeTheme, CustomThemeSettings } from '@/types'
 
+const defaultLightBase = {
+  color: '#2f3033',
+  muted: '#7d858c',
+  border: '#e7e7e7',
+  bgSoft: '#f7fbf8',
+  quoteBg: '#f5f7f6',
+}
+
 export const themes: Record<string, Theme> = {
   classic: {
     name: '经典微信',
@@ -7,12 +15,8 @@ export const themes: Record<string, Theme> = {
     base: {
       fontFamily:
         "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif",
-      color: '#2f3033',
+      ...defaultLightBase,
       accent: '#07c160',
-      muted: '#7d858c',
-      border: '#e7e7e7',
-      bgSoft: '#f7fbf8',
-      quoteBg: '#f5f7f6',
       h1Mode: 'underline',
       headingMode: 'bar',
       quoteMode: 'bar',
@@ -170,12 +174,8 @@ export function applyCustomThemeSettings(): Theme {
     description: '根据你的配色、字号和行宽保存。',
     base: {
       fontFamily: custom.fontFamily,
-      color: '#2f3033',
+      ...defaultLightBase,
       accent: custom.accent,
-      muted: '#7d858c',
-      border: '#e7e7e7',
-      bgSoft: '#f7fbf8',
-      quoteBg: '#f5f7f6',
       h1Mode: custom.h1Mode,
       headingMode: custom.headingMode,
       quoteMode: custom.quoteMode,

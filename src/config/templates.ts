@@ -1,41 +1,48 @@
 import type { Template } from '@/types'
 
-export const sampleMarkdown = `# 用 Markdown 写公众号
+export const sampleMarkdown = `# Markdown 排版演示
 
-这是一段适合微信公众号后台粘贴的排版预览。工具会把 Markdown 转成带 **内联样式** 的 HTML，复制后更容易保留样式。
+这是一段专为微信公众号优化的 **Markdown 渲染** 演示。工具会将内容转换成带 *内联样式* 的 HTML，复制后可直接粘贴到公众号后台。
 
-## 为什么要做专用渲染
+## 文本格式与列表
 
-普通网页预览依赖 CSS class，但公众号编辑器会清洗样式。更稳的方式是：
+支持常见的行内样式：
 
-- 将标题、段落、列表、引用转成微信友好的结构
-- 把主题样式直接写到元素上
-- 将外链整理成文末脚注
-
-> 复制前先看右侧预览；如果包含本地图片或很宽的表格，兼容性面板会提示你。
+- **加粗**、*斜体*、~~删除线~~ 和 \`行内代码\`
+- [Markdown 官方文档](https://markdown.com.cn/) 会自动转成文末脚注
+- 任务列表：
+  - [x] 主题切换
+  - [ ] 深色模式
 
 ## 代码块
 
-\`\`\`js
-function copyToWechat(html) {
-  return navigator.clipboard.write([
-    new ClipboardItem({
-      "text/html": new Blob([html], { type: "text/html" }),
-      "text/plain": new Blob([html.replace(/<[^>]+>/g, "")], { type: "text/plain" })
-    })
-  ]);
+\`\`\`ts
+interface Article {
+  title: string;
+  author: string;
+  tags: string[];
+}
+
+function render(article: Article): string {
+  return "<h1>" + article.title + "</h1>";
 }
 \`\`\`
 
 ## 表格
 
-| 能力 | 第一版 | 说明 |
-| --- | --- | --- |
-| 主题切换 | 支持 | 内置 11 套主题 |
-| 链接脚注 | 支持 | 更适合微信正文 |
-| 富文本复制 | 支持 | 写入 text/html |
+| 特性 | 状态 | 说明 |
+|------|------|------|
+| 主题系统 | 已支持 | 6 套内置主题 + 自定义 |
+| 代码高亮 | 已支持 | 浅色 / 深色 / 纸张 |
+| 智能排版 | 已支持 | 自动优化 CJK 间距 |
 
-查看参考：[Markdown 中文网](https://markdown.com.cn/)。
+## 引用与分割线
+
+> 好的排版是隐形的：它让读者专注于内容，而不是样式。
+
+---
+
+感谢体验！如果觉得有用，欢迎分享给你的朋友。
 `
 
 export const templates: Record<string, Template> = {
