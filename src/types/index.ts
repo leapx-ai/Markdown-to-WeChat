@@ -34,15 +34,13 @@ export interface CodeTheme {
 
 export interface CustomThemeSettings {
   accent: string
-  color: string
-  bg: string
-  quoteBg: string
-  codeBg: string
-  borderColor: string
-  headingMode: string
   fontSize: number
   lineHeight: number
   width: number
+  h1Mode: string
+  headingMode: string
+  quoteMode: string
+  fontFamily: string
 }
 
 export interface ImageSettings {
@@ -68,6 +66,7 @@ export interface Template {
 export interface WarningItem {
   level: 'danger' | 'warn' | 'info' | 'ok'
   text: string
+  type?: 'localImage' | 'emptyLink' | 'unclosedCode' | 'multiH1' | 'deepHeading' | 'externalLink' | 'manyTables' | 'longLine' | 'longCode' | 'fewHeadings' | 'noHeading'
 }
 
 export interface MarkdownStats {

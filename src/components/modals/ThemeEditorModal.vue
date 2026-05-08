@@ -2,22 +2,48 @@
 import { ref, computed } from 'vue'
 import { useUiStore } from '@/stores/ui'
 import { useThemeStore } from '@/stores/theme'
+import AppIcon from '@/components/ui/AppIcon.vue'
 
 const ui = useUiStore()
 const themeStore = useThemeStore()
 
 const isOpen = computed(() => ui.activeModals.themeEditor)
 
-const accent = ref('#137565')
-const color = ref('#1f2429')
-const bg = ref('#ffffff')
-const quoteBg = ref('#f5faf8')
-const codeBg = ref('#f8fafc')
-const borderColor = ref('#e4e8ee')
-const headingMode = ref('bar')
+const accent = ref('#07c160')
 const fontSize = ref(16)
-const lineHeight = ref(180)
-const width = ref(480)
+const lineHeight = ref(1.8)
+const width = ref(420)
+const h1Mode = ref<'underline' | 'center' | 'panel' | 'plain'>('underline')
+const headingMode = ref<'bar' | 'chip' | 'plain'>('bar')
+const quoteMode = ref<'bar' | 'panel' | 'soft'>('bar')
+const fontFamily = ref("-apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif")
+
+const presetColors = ['#07c160', '#111111', '#006d77', '#2468a2', '#b14f2a', '#8ab4a6', '#dc2626', '#2563eb', '#f59e0b', '#7c3aed']
+
+const fontOptions = [
+  { label: '系统默认', value: "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif" },
+  { label: '宋体/衬线', value: "'Songti SC', 'STSong', 'Noto Serif CJK SC', 'SimSun', serif" },
+  { label: '优雅西文', value: "'Optima', 'PingFang SC', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, sans-serif" },
+]
+
+const h1Modes = [
+  { label: '下划线', value: 'underline' },
+  { label: '居中', value: 'center' },
+  { label: '卡片', value: 'panel' },
+  { label: '朴素', value: 'plain' },
+]
+
+const headingModes = [
+  { label: '竖线', value: 'bar' },
+  { label: '标签', value: 'chip' },
+  { label: '朴素', value: 'plain' },
+]
+
+const quoteModes = [
+  { label: '竖线', value: 'bar' },
+  { label: '卡片', value: 'panel' },
+  { label: '柔和', value: 'soft' },
+]
 
 function close() {
   ui.closeModal('themeEditor')
@@ -25,19 +51,18 @@ function close() {
 
 function save() {
   themeStore.setCustomTheme({
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif",
-    color: color.value,
+    fontFamily: fontFamily.value,
+    color: '#2f3033',
     accent: accent.value,
-    muted: '#68717d',
-    border: borderColor.value,
-    bgSoft: quoteBg.value,
-    quoteBg: quoteBg.value,
-    canvas: bg.value !== '#ffffff' ? bg.value : undefined,
-    h1Mode: 'panel',
+    muted: '#7d858c',
+    border: '#e7e7e7',
+    bgSoft: '#f7fbf8',
+    quoteBg: '#f5f7f6',
+    h1Mode: h1Mode.value,
     headingMode: headingMode.value,
-    quoteMode: 'soft',
+    quoteMode: quoteMode.value,
     fontSize: fontSize.value,
-    lineHeight: lineHeight.value / 100,
+    lineHeight: lineHeight.value,
     width: width.value,
   })
   themeStore.currentThemeKey = 'custom'
@@ -45,18 +70,68 @@ function save() {
 }
 
 function reset() {
-  themeStore.resetCustomTheme()
+  accent.value = '#07c160'
+  fontSize.value = 16
+  lineHeight.value = 1.8
+  width.value = 420
+  h1Mode.value = 'underline'
+  headingMode.value = 'bar'
+  quoteMode.value = 'bar'
+  fontFamily.value = "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif"
 }
 
 const previewHtml = computed(() => {
-  return `<h1 style="margin:0 0 16px;color:${color.value};font-size:${fontSize.value + 8}px;font-weight:700;line-height:1.36;">标题示例</h1>
-<p style="margin:0 0 12px;line-height:${lineHeight.value / 100};color:${color.value};font-size:${fontSize.value}px;">这是正文内容示例，支持自定义字体大小和行高设置。你可以通过左侧的控件实时调整样式。</p>
-<blockquote style="margin:16px 0;padding:12px 16px;background:${quoteBg.value};border-left:4px solid ${accent.value};color:${color.value};border-radius:0 6px 6px 0;">
+  const lh = lineHeight.value
+  const fs = fontSize.value
+  const w = width.value
+  const ac = accent.value
+
+  // H1 style based on mode (matching markdownRenderer.ts h1Style)
+  let h1Style = ''
+  const h1Size = fs + 8
+  if (h1Mode.value === 'center') {
+    h1Style = `margin:0 0 24px;color:#2f3033;font-size:${h1Size}px;font-weight:700;line-height:1.36;text-align:center;padding:8px 0 18px;border-bottom:1px solid #e7e7e7;`
+  } else if (h1Mode.value === 'panel') {
+    h1Style = `margin:0 0 24px;color:#2f3033;font-size:${h1Size}px;font-weight:700;line-height:1.36;padding:18px;border:1px solid #e7e7e7;border-radius:8px;background:#f7fbf8;`
+  } else if (h1Mode.value === 'plain') {
+    h1Style = `margin:0 0 24px;color:#2f3033;font-size:${h1Size}px;font-weight:700;line-height:1.36;padding:0 0 4px;`
+  } else {
+    h1Style = `margin:0 0 24px;color:#2f3033;font-size:${h1Size}px;font-weight:700;line-height:1.36;padding:0 0 12px;border-bottom:2px solid ${ac};`
+  }
+
+  // Heading content span (matching markdownRenderer.ts headingContent)
+  let headingSpanStyle = ''
+  if (headingMode.value === 'chip') {
+    headingSpanStyle = `display:inline-block;padding:5px 10px;border-radius:6px;background:#f7fbf8;color:${ac};`
+  } else if (headingMode.value === 'plain') {
+    headingSpanStyle = `display:inline-block;padding-bottom:3px;border-bottom:1px solid ${ac};`
+  } else {
+    headingSpanStyle = `display:inline-block;padding-left:10px;border-left:4px solid ${ac};`
+  }
+
+  // Quote style (matching markdownRenderer.ts quoteStyle)
+  let quoteStyle = ''
+  const quoteFontSize = Math.max(13, fs - 1)
+  if (quoteMode.value === 'panel') {
+    quoteStyle = `margin:18px 0;padding:14px 15px;border:1px solid #e7e7e7;border-radius:8px;background:#f5f7f6;color:#7d858c;font-size:${quoteFontSize}px;line-height:${lh};`
+  } else if (quoteMode.value === 'soft') {
+    quoteStyle = `margin:18px 0;padding:13px 15px;border-radius:8px;background:#f5f7f6;color:#7d858c;font-size:${quoteFontSize}px;line-height:${lh};`
+  } else {
+    quoteStyle = `margin:18px 0;padding:12px 14px;border-left:4px solid ${ac};background:#f5f7f6;color:#7d858c;font-size:${quoteFontSize}px;line-height:${lh};`
+  }
+
+  return `<div style="max-width:${w}px;margin:0 auto;font-family:${fontFamily.value};">
+<h1 style="${h1Style}">标题示例</h1>
+<h2 style="margin:28px 0 14px;color:#2f3033;font-size:${fs + 4}px;font-weight:700;line-height:1.45;"><span style="${headingSpanStyle}">二级标题示例</span></h2>
+<p style="margin:0 0 14px;line-height:${lh};color:#2f3033;font-size:${fs}px;">这是正文内容示例，支持自定义字体大小、行高和行宽设置。你可以通过左侧的控件实时调整样式，右侧预览会同步反映变更。</p>
+<p style="margin:0 0 14px;line-height:${lh};color:#2f3033;font-size:${fs}px;">第二段文字用于展示段落间距与行高效果。合适的行高能显著提升长文阅读体验。</p>
+<blockquote style="${quoteStyle}">
   这是引用块示例，使用主色作为左侧边框。
 </blockquote>
-<pre style="margin:16px 0;padding:16px;background:${codeBg.value};border-radius:8px;overflow-x:auto;border:1px solid ${borderColor.value};"><code style="font-family:Menlo,Monaco,Consolas,monospace;font-size:13px;line-height:1.7;color:${color.value};">function hello() {
+<pre style="margin:18px 0;padding:16px;background:#f8fafc;border-radius:8px;overflow-x:auto;border:1px solid #e4e8ee;"><code style="font-family:Menlo,Monaco,Consolas,monospace;font-size:13px;line-height:1.7;color:#2f3033;">function hello() {
   console.log('Hello World!')
-}</code></pre>`
+}</code></pre>
+</div>`
 })
 </script>
 
@@ -64,135 +139,219 @@ const previewHtml = computed(() => {
   <Teleport to="body">
     <Transition name="modal">
       <div v-if="isOpen" class="modal-backdrop" @click.self="close">
-        <section class="modal" role="dialog" aria-modal="true" style="min-width: 720px;">
-          <div class="flex items-start justify-between gap-4 shrink-0 px-5 pt-5 pb-4">
+        <section class="modal" role="dialog" aria-modal="true" style="min-width: 720px; max-width: 960px; width: 85vw;">
+          <div class="flex items-start justify-between gap-4 shrink-0 px-6 pt-5 pb-4">
             <div>
               <p class="text-[11px] font-semibold tracking-widest uppercase text-text-tertiary mb-0.5">Theme Builder</p>
               <h2 class="text-lg font-semibold tracking-tight leading-tight">自定义主题</h2>
             </div>
             <button
               type="button"
-              class="w-8 h-8 flex items-center justify-center rounded-md text-text-tertiary hover:text-text hover:bg-surface-hover text-xl border border-border-subtle hover:border-border bg-transparent transition-all"
+              class="w-8 h-8 flex items-center justify-center rounded-xl text-text-tertiary hover:text-text hover:bg-surface-hover border border-border bg-transparent transition-all"
               aria-label="关闭"
               @click="close"
             >
-              ×
+              <AppIcon name="x" :size="16" />
             </button>
           </div>
-          <div class="p-5 grid grid-cols-[320px_1fr] gap-6 overflow-y-auto">
-            <!-- Left: Controls -->
+
+          <div class="grid grid-cols-[280px_1fr] gap-6 px-6 pb-6">
+            <!-- Controls -->
             <div class="space-y-6">
-              <div>
-                <h3 class="text-sm font-semibold text-text mb-3 flex items-center gap-2">
-                  <span class="w-1 h-4 rounded-full bg-text" />
-                  颜色配置
-                </h3>
-                <div class="grid grid-cols-2 gap-3">
-                  <label class="grid gap-1.5">
-                    <span class="text-xs font-medium text-text-secondary">主色</span>
-                    <div class="flex items-center gap-2">
-                      <input v-model="accent" type="color" class="w-8 h-8 rounded-md border border-border-subtle p-0.5" />
-                      <span class="text-xs font-mono text-text-tertiary">{{ accent }}</span>
-                    </div>
+              <!-- Color -->
+              <div class="space-y-2.5">
+                <span class="text-xs font-semibold text-text-secondary">主色</span>
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    v-for="c in presetColors"
+                    :key="c"
+                    type="button"
+                    class="w-7 h-7 rounded-full border-2 transition-all active:scale-90"
+                    :class="accent === c ? 'border-text scale-110 shadow-sm' : 'border-transparent hover:scale-105'"
+                    :style="{ background: c }"
+                    @click="accent = c"
+                  />
+                  <label class="w-7 h-7 rounded-full border-2 border-border-subtle hover:border-border transition-all cursor-pointer relative overflow-hidden">
+                    <input v-model="accent" type="color" class="absolute -top-2 -left-2 w-12 h-12 p-0 border-0 cursor-pointer" />
                   </label>
-                  <label class="grid gap-1.5">
-                    <span class="text-xs font-medium text-text-secondary">正文色</span>
-                    <div class="flex items-center gap-2">
-                      <input v-model="color" type="color" class="w-8 h-8 rounded-md border border-border-subtle p-0.5" />
-                      <span class="text-xs font-mono text-text-tertiary">{{ color }}</span>
-                    </div>
-                  </label>
-                  <label class="grid gap-1.5">
-                    <span class="text-xs font-medium text-text-secondary">背景色</span>
-                    <div class="flex items-center gap-2">
-                      <input v-model="bg" type="color" class="w-8 h-8 rounded-md border border-border-subtle p-0.5" />
-                      <span class="text-xs font-mono text-text-tertiary">{{ bg }}</span>
-                    </div>
-                  </label>
-                  <label class="grid gap-1.5">
-                    <span class="text-xs font-medium text-text-secondary">引用色</span>
-                    <div class="flex items-center gap-2">
-                      <input v-model="quoteBg" type="color" class="w-8 h-8 rounded-md border border-border-subtle p-0.5" />
-                      <span class="text-xs font-mono text-text-tertiary">{{ quoteBg }}</span>
-                    </div>
-                  </label>
-                  <label class="grid gap-1.5">
-                    <span class="text-xs font-medium text-text-secondary">代码块背景</span>
-                    <div class="flex items-center gap-2">
-                      <input v-model="codeBg" type="color" class="w-8 h-8 rounded-md border border-border-subtle p-0.5" />
-                      <span class="text-xs font-mono text-text-tertiary">{{ codeBg }}</span>
-                    </div>
-                  </label>
-                  <label class="grid gap-1.5">
-                    <span class="text-xs font-medium text-text-secondary">边框色</span>
-                    <div class="flex items-center gap-2">
-                      <input v-model="borderColor" type="color" class="w-8 h-8 rounded-md border border-border-subtle p-0.5" />
-                      <span class="text-xs font-mono text-text-tertiary">{{ borderColor }}</span>
-                    </div>
-                  </label>
+                </div>
+                <span class="text-xs font-mono text-text-tertiary">{{ accent }}</span>
+              </div>
+
+              <!-- Typography -->
+              <div class="space-y-2.5">
+                <span class="text-xs font-semibold text-text-secondary">字体</span>
+                <div class="flex gap-1.5">
+                  <button
+                    v-for="opt in fontOptions"
+                    :key="opt.value"
+                    type="button"
+                    class="flex-1 h-8 rounded-lg text-[12px] font-medium border transition-all active:scale-95"
+                    :class="fontFamily === opt.value
+                      ? 'border-accent bg-accent/10 text-accent'
+                      : 'border-border-subtle bg-transparent text-text-secondary hover:border-border hover:bg-surface-hover'"
+                    @click="fontFamily = opt.value"
+                  >
+                    {{ opt.label }}
+                  </button>
                 </div>
               </div>
 
-              <div>
-                <h3 class="text-sm font-semibold text-text mb-3 flex items-center gap-2">
-                  <span class="w-1 h-4 rounded-full bg-text" />
-                  样式配置
-                </h3>
-                <div class="space-y-3">
-                  <label class="grid gap-1.5">
-                    <span class="text-xs font-medium text-text-secondary">标题样式</span>
-                    <select v-model="headingMode">
-                      <option value="bar">侧边线</option>
-                      <option value="chip">标签</option>
-                      <option value="plain">下划线</option>
-                      <option value="none">无样式</option>
-                    </select>
-                  </label>
-                  <label class="grid gap-1.5">
-                    <div class="flex items-center justify-between">
-                      <span class="text-xs font-medium text-text-secondary">正文字号</span>
-                      <span class="text-xs font-mono text-text-tertiary">{{ fontSize }}px</span>
-                    </div>
-                    <input v-model="fontSize" type="range" min="14" max="20" />
-                  </label>
-                  <label class="grid gap-1.5">
-                    <div class="flex items-center justify-between">
-                      <span class="text-xs font-medium text-text-secondary">行高</span>
-                      <span class="text-xs font-mono text-text-tertiary">{{ (lineHeight / 100).toFixed(2) }}</span>
-                    </div>
-                    <input v-model="lineHeight" type="range" min="150" max="220" />
-                  </label>
-                  <label class="grid gap-1.5">
-                    <div class="flex items-center justify-between">
-                      <span class="text-xs font-medium text-text-secondary">内容宽度</span>
-                      <span class="text-xs font-mono text-text-tertiary">{{ width }}px</span>
-                    </div>
-                    <input v-model="width" type="range" min="360" max="600" />
-                  </label>
+              <!-- Sliders -->
+              <div class="space-y-4">
+                <div class="space-y-1.5">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-text-secondary">正文字号</span>
+                    <span class="text-xs font-mono text-text-tertiary bg-bg px-1.5 py-0.5 rounded">{{ fontSize }}px</span>
+                  </div>
+                  <input v-model="fontSize" type="range" min="14" max="20" class="w-full accent-slider" />
+                  <div class="flex justify-between text-[10px] text-text-tertiary px-0.5">
+                    <span>14</span>
+                    <span>20</span>
+                  </div>
+                </div>
+
+                <div class="space-y-1.5">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-text-secondary">行高</span>
+                    <span class="text-xs font-mono text-text-tertiary bg-bg px-1.5 py-0.5 rounded">{{ lineHeight }}</span>
+                  </div>
+                  <input v-model="lineHeight" type="range" min="1.5" max="2.2" step="0.05" class="w-full accent-slider" />
+                  <div class="flex justify-between text-[10px] text-text-tertiary px-0.5">
+                    <span>1.5</span>
+                    <span>2.2</span>
+                  </div>
+                </div>
+
+                <div class="space-y-1.5">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-text-secondary">内容宽度</span>
+                    <span class="text-xs font-mono text-text-tertiary bg-bg px-1.5 py-0.5 rounded">{{ width }}px</span>
+                  </div>
+                  <input v-model="width" type="range" min="360" max="600" class="w-full accent-slider" />
+                  <div class="flex justify-between text-[10px] text-text-tertiary px-0.5">
+                    <span>360</span>
+                    <span>600</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Modes -->
+              <div class="space-y-3.5">
+                <div class="space-y-2">
+                  <span class="text-xs font-semibold text-text-secondary">一级标题样式</span>
+                  <div class="flex gap-1">
+                    <button
+                      v-for="m in h1Modes"
+                      :key="m.value"
+                      type="button"
+                      class="flex-1 h-8 rounded-lg text-[12px] font-medium border transition-all active:scale-95"
+                      :class="h1Mode === m.value
+                        ? 'border-accent bg-accent/10 text-accent'
+                        : 'border-border-subtle bg-transparent text-text-secondary hover:border-border hover:bg-surface-hover'"
+                      @click="h1Mode = m.value as any"
+                    >
+                      {{ m.label }}
+                    </button>
+                  </div>
+                </div>
+
+                <div class="space-y-2">
+                  <span class="text-xs font-semibold text-text-secondary">二级以上标题样式</span>
+                  <div class="flex gap-1">
+                    <button
+                      v-for="m in headingModes"
+                      :key="m.value"
+                      type="button"
+                      class="flex-1 h-8 rounded-lg text-[12px] font-medium border transition-all active:scale-95"
+                      :class="headingMode === m.value
+                        ? 'border-accent bg-accent/10 text-accent'
+                        : 'border-border-subtle bg-transparent text-text-secondary hover:border-border hover:bg-surface-hover'"
+                      @click="headingMode = m.value as any"
+                    >
+                      {{ m.label }}
+                    </button>
+                  </div>
+                </div>
+
+                <div class="space-y-2">
+                  <span class="text-xs font-semibold text-text-secondary">引用块样式</span>
+                  <div class="flex gap-1">
+                    <button
+                      v-for="m in quoteModes"
+                      :key="m.value"
+                      type="button"
+                      class="flex-1 h-8 rounded-lg text-[12px] font-medium border transition-all active:scale-95"
+                      :class="quoteMode === m.value
+                        ? 'border-accent bg-accent/10 text-accent'
+                        : 'border-border-subtle bg-transparent text-text-secondary hover:border-border hover:bg-surface-hover'"
+                      @click="quoteMode = m.value as any"
+                    >
+                      {{ m.label }}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- Right: Preview -->
-            <div>
-              <h3 class="text-sm font-semibold text-text mb-3 flex items-center gap-2">
-                <span class="w-1 h-4 rounded-full bg-text" />
-                实时预览
-              </h3>
-              <div
-                class="border border-border rounded-xl p-6 overflow-y-auto"
-                :style="{ background: bg, height: '480px' }"
-              >
+            <!-- Preview -->
+            <div class="border border-border rounded-2xl overflow-hidden flex flex-col bg-white shadow-sm">
+              <div class="shrink-0 px-5 py-3 border-b border-border-subtle flex items-center gap-2.5 bg-bg/40">
+                <span class="w-2 h-2 rounded-full bg-success" />
+                <span class="text-[11px] font-semibold tracking-widest uppercase text-text-tertiary">实时预览</span>
+              </div>
+              <div class="flex-1 overflow-y-auto p-6 bg-white">
                 <div v-html="previewHtml" />
               </div>
             </div>
           </div>
-          <div class="flex justify-end gap-2.5 shrink-0 px-5 pt-4 pb-5 border-t border-border-subtle dark:border-border">
-            <button type="button" class="h-9 px-3.5 rounded-md text-[13px] font-medium bg-transparent text-text border border-border-subtle hover:border-border hover:bg-surface-hover transition-all" @click="reset">重置</button>
-            <button type="button" class="h-9 px-3.5 rounded-md text-[13px] font-medium bg-[#18181b] text-white border border-[#18181b] hover:bg-[#27272a] hover:border-[#27272a] transition-all" @click="save">保存并使用</button>
+
+          <div class="flex justify-end gap-2.5 shrink-0 px-6 pt-4 pb-6 border-t border-border-subtle dark:border-border">
+            <button type="button" class="h-9 px-4 rounded-xl text-[13px] font-medium bg-surface text-text border border-border hover:bg-surface-hover active:scale-[0.96] transition-all inline-flex items-center justify-center gap-2" @click="reset">重置</button>
+            <button type="button" class="h-9 px-4 rounded-xl text-[13px] font-semibold bg-[#18181b] !text-white border border-[#18181b] hover:bg-[#27272a] hover:border-[#27272a] active:scale-[0.96] transition-all inline-flex items-center justify-center gap-2 shadow-sm" @click="save">保存并使用</button>
           </div>
         </section>
       </div>
     </Transition>
   </Teleport>
 </template>
+
+<style scoped>
+.accent-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-border);
+  outline: none;
+  cursor: pointer;
+}
+
+.accent-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  border: 2px solid var(--color-surface);
+  transition: transform 0.15s ease;
+}
+
+.accent-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.accent-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  cursor: pointer;
+  border: 2px solid var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+</style>

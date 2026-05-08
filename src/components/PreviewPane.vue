@@ -21,7 +21,7 @@ const previewStyle = computed(() => ({
   >
     <div class="flex items-center justify-between gap-3 h-11 px-4 shrink-0 text-[11px] font-semibold tracking-widest uppercase text-text-tertiary border-b border-border-subtle dark:border-border">
       <strong class="text-text-secondary font-semibold">微信预览</strong>
-      <span>复制时会包含内联样式</span>
+      <span class="text-[10px] text-text-tertiary hidden sm:inline">复制时会包含内联样式</span>
     </div>
     <div class="flex-1 min-h-0 overflow-auto p-6 flex items-start justify-center">
       <article

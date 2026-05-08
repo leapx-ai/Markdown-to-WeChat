@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useUiStore } from '@/stores/ui'
 import { useClipboard } from '@/composables/useClipboard'
+import AppIcon from '@/components/ui/AppIcon.vue'
 import type { WarningItem, PreflightCounts } from '@/types'
 
 const props = defineProps<{
@@ -37,11 +38,11 @@ async function confirmCopy() {
             </div>
             <button
               type="button"
-              class="w-8 h-8 flex items-center justify-center rounded-md text-text-tertiary hover:text-text hover:bg-surface-hover text-xl border border-border-subtle hover:border-border bg-transparent transition-all"
+              class="w-8 h-8 flex items-center justify-center rounded-lg text-text-tertiary hover:text-text hover:bg-surface-hover text-xl border border-border bg-transparent transition-all"
               aria-label="关闭"
               @click="close"
             >
-              ×
+              <AppIcon name="x" :size="16" />
             </button>
           </div>
           <div class="grid grid-cols-3 gap-3 px-5 pb-4">
@@ -72,10 +73,10 @@ async function confirmCopy() {
             </div>
           </div>
           <div class="flex justify-end gap-2.5 shrink-0 px-5 pt-4 pb-5 border-t border-border-subtle dark:border-border">
-            <button type="button" class="h-9 px-3.5 rounded-md text-[13px] font-medium bg-transparent text-text border border-border-subtle hover:border-border hover:bg-surface-hover transition-all" @click="close">取消</button>
+            <button type="button" class="h-9 px-3.5 rounded-lg text-[13px] font-medium bg-surface text-text border border-border hover:bg-surface-hover transition-all" @click="close">取消</button>
             <button
               type="button"
-              class="h-9 px-3.5 rounded-md text-[13px] font-medium bg-[#18181b] text-white border border-[#18181b] hover:bg-[#27272a] hover:border-[#27272a] transition-all"
+              class="h-9 px-3.5 rounded-lg text-[13px] font-medium bg-[#18181b] text-white border border-[#18181b] hover:bg-[#27272a] hover:border-[#27272a] transition-all inline-flex items-center justify-center gap-2"
               @click="confirmCopy"
             >
               {{ counts.danger ? '仍然复制' : '继续复制' }}

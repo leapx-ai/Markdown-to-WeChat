@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import { useStorage, useDark } from '@vueuse/core'
+import { useStorage } from '@vueuse/core'
 import { themes, codeThemes, applyCustomThemeSettings, THEME_KEY, CODE_THEME_KEY, LAST_LIGHT_THEME_KEY } from '@/config/themes'
 import type { Theme, CodeTheme } from '@/types'
 
@@ -8,7 +8,6 @@ export const useThemeStore = defineStore('theme', () => {
   const storedTheme = useStorage(THEME_KEY, 'classic')
   const storedCodeTheme = useStorage(CODE_THEME_KEY, 'light')
   const lastLightTheme = useStorage(LAST_LIGHT_THEME_KEY, 'classic')
-  const isDark = useDark()
 
   const currentThemeKey = computed({
     get: () => {
@@ -20,7 +19,6 @@ export const useThemeStore = defineStore('theme', () => {
         lastLightTheme.value = key
       }
       storedTheme.value = key
-      isDark.value = key === 'night'
     },
   })
 
@@ -39,30 +37,33 @@ export const useThemeStore = defineStore('theme', () => {
     return result
   })
 
-  const currentTheme = computed(() => allThemes.value[currentThemeKey.value] || allThemes.value.classic)
-  const currentCodeTheme = computed(() => codeThemes[currentCodeThemeKey.value] || codeThemes.light)
+  const currentTheme = computed(() => (allThemes.value[currentThemeKey.value] || allThemes.value.classic) as Theme)
+  const currentCodeTheme = computed(() => (codeThemes[currentCodeThemeKey.value] || codeThemes.light) as CodeTheme)
   const themeBase = computed(() => currentTheme.value.base)
 
-  const setCustomTheme = (settings: Theme['base']) => {
+  const setCustomTheme = (settings: Partial<Theme['base']>) => {
+    const baseTheme = themes[lastLightTheme.value]?.base ?? (themes.classic as Theme).base
     customTheme.value = {
       name: '我的主题',
-      description: '根据你的配色、字号和行高保存。',
-      base: settings,
+      description: '根据你的配色、字号和行宽保存。',
+      base: { ...baseTheme, ...settings },
     }
+    try {
+      localStorage.setItem('wechat-md-custom-theme', JSON.stringify({
+        accent: settings.accent,
+        fontSize: settings.fontSize,
+        lineHeight: settings.lineHeight,
+        width: settings.width,
+        h1Mode: settings.h1Mode,
+        headingMode: settings.headingMode,
+        quoteMode: settings.quoteMode,
+        fontFamily: settings.fontFamily,
+      }))
+    } catch { /* ignore */ }
   }
 
   const resetCustomTheme = () => {
     customTheme.value = applyCustomThemeSettings()
-  }
-
-  const toggleDarkMode = () => {
-    if (currentThemeKey.value === 'night') {
-      const last = lastLightTheme.value
-      currentThemeKey.value = themes[last] ? last : 'classic'
-    } else {
-      lastLightTheme.value = currentThemeKey.value
-      currentThemeKey.value = 'night'
-    }
   }
 
   return {
@@ -73,9 +74,7 @@ export const useThemeStore = defineStore('theme', () => {
     themeBase,
     customTheme,
     allThemes,
-    isDark,
     setCustomTheme,
     resetCustomTheme,
-    toggleDarkMode,
   }
 })

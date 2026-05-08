@@ -85,73 +85,6 @@ export const themes: Record<string, Theme> = {
       quoteMode: 'soft',
     },
   },
-  atelier: {
-    name: '现代留白',
-    description: '轻盈高级，标题和引用更舒展。',
-    base: {
-      fontFamily:
-        "'Avenir Next', 'PingFang SC', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, sans-serif",
-      color: '#202426',
-      accent: '#2f6f73',
-      muted: '#6d7678',
-      border: '#dfe7e6',
-      bgSoft: '#f6faf9',
-      quoteBg: '#f2f7f6',
-      h1Mode: 'plain',
-      headingMode: 'chip',
-      quoteMode: 'panel',
-    },
-  },
-  ink: {
-    name: '墨韵东方',
-    description: '沉静雅致，适合文化和随笔。',
-    base: {
-      fontFamily: "'Songti SC', 'STSong', 'Noto Serif CJK SC', 'SimSun', serif",
-      color: '#23211d',
-      accent: '#3b4b3a',
-      muted: '#706b61',
-      border: '#ddd7cc',
-      bgSoft: '#fbfaf6',
-      quoteBg: '#f4f1ea',
-      h1Mode: 'center',
-      headingMode: 'plain',
-      quoteMode: 'bar',
-    },
-  },
-  finance: {
-    name: '金融刊物',
-    description: '稳重大气，适合分析和洞察。',
-    base: {
-      fontFamily:
-        "'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, sans-serif",
-      color: '#1d2733',
-      accent: '#9a6a21',
-      muted: '#68717d',
-      border: '#e2d6bd',
-      bgSoft: '#fbf7ee',
-      quoteBg: '#f7f1e4',
-      h1Mode: 'panel',
-      headingMode: 'bar',
-      quoteMode: 'soft',
-    },
-  },
-  product: {
-    name: '产品简报',
-    description: '结构明确，适合更新和复盘。',
-    base: {
-      fontFamily:
-        "-apple-system, BlinkMacSystemFont, 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif",
-      color: '#22272f',
-      accent: '#4f6f52',
-      muted: '#6f7782',
-      border: '#dce4d8',
-      bgSoft: '#f5f8f2',
-      quoteBg: '#f1f6ee',
-      h1Mode: 'panel',
-      headingMode: 'chip',
-      quoteMode: 'panel',
-    },
-  },
   night: {
     name: '夜读深灰',
     description: '深色沉浸，适合夜读和专题。',
@@ -168,23 +101,6 @@ export const themes: Record<string, Theme> = {
       h1Mode: 'underline',
       headingMode: 'chip',
       quoteMode: 'panel',
-    },
-  },
-  column: {
-    name: '松弛专栏',
-    description: '温暖自然，适合个人品牌表达。',
-    base: {
-      fontFamily:
-        "'Hiragino Sans GB', 'PingFang SC', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, sans-serif",
-      color: '#2a2c2b',
-      accent: '#9b5f45',
-      muted: '#766f6a',
-      border: '#eadfd8',
-      bgSoft: '#fff8f3',
-      quoteBg: '#fbefe7',
-      h1Mode: 'plain',
-      headingMode: 'bar',
-      quoteMode: 'soft',
     },
   },
 }
@@ -229,37 +145,19 @@ export const LAST_LIGHT_THEME_KEY = 'wechat-md-last-light-theme'
 
 export function getCustomThemeSettings(): CustomThemeSettings {
   const fallback: CustomThemeSettings = {
-    accent: '#137565',
-    color: '#1f2429',
-    bg: '#ffffff',
-    quoteBg: '#f5faf8',
-    codeBg: '#f8fafc',
-    borderColor: '#e4e8ee',
-    headingMode: 'bar',
+    accent: '#07c160',
     fontSize: 16,
-    lineHeight: 1.85,
+    lineHeight: 1.8,
     width: 420,
+    h1Mode: 'underline',
+    headingMode: 'bar',
+    quoteMode: 'bar',
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif",
   }
   try {
     const stored = localStorage.getItem(CUSTOM_THEME_KEY)
     if (stored) return { ...fallback, ...JSON.parse(stored) }
-    const legacy = localStorage.getItem('customTheme')
-    if (!legacy) return fallback
-    const parsed = JSON.parse(legacy)
-    const migrated: CustomThemeSettings = {
-      accent: parsed.accent || fallback.accent,
-      color: parsed.textColor || parsed.text || parsed.color || fallback.color,
-      bg: parsed.bgColor || parsed.bg || fallback.bg,
-      quoteBg: parsed.quoteBg || parsed.bgSoft || fallback.quoteBg,
-      codeBg: parsed.codeBg || fallback.codeBg,
-      borderColor: parsed.borderColor || fallback.borderColor,
-      headingMode: parsed.headingMode || fallback.headingMode,
-      fontSize: Number(parsed.fontSize || fallback.fontSize),
-      lineHeight: Number(parsed.lineHeight || fallback.lineHeight),
-      width: Number(parsed.width || fallback.width),
-    }
-    localStorage.setItem(CUSTOM_THEME_KEY, JSON.stringify(migrated))
-    return { ...fallback, ...migrated }
+    return fallback
   } catch {
     return fallback
   }
@@ -267,23 +165,20 @@ export function getCustomThemeSettings(): CustomThemeSettings {
 
 export function applyCustomThemeSettings(): Theme {
   const custom = getCustomThemeSettings()
-  const canvas = custom.bg && custom.bg.toLowerCase() !== '#ffffff' ? custom.bg : undefined
   return {
     name: '我的主题',
-    description: '根据你的配色、字号和行高保存。',
+    description: '根据你的配色、字号和行宽保存。',
     base: {
-      fontFamily:
-        "-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif",
-      color: custom.color,
+      fontFamily: custom.fontFamily,
+      color: '#2f3033',
       accent: custom.accent,
-      muted: '#68717d',
-      border: custom.borderColor,
-      bgSoft: custom.quoteBg,
-      quoteBg: custom.quoteBg,
-      canvas,
-      h1Mode: 'panel',
+      muted: '#7d858c',
+      border: '#e7e7e7',
+      bgSoft: '#f7fbf8',
+      quoteBg: '#f5f7f6',
+      h1Mode: custom.h1Mode,
       headingMode: custom.headingMode,
-      quoteMode: 'soft',
+      quoteMode: custom.quoteMode,
       fontSize: Number(custom.fontSize),
       lineHeight: Number(custom.lineHeight),
       width: Number(custom.width),
