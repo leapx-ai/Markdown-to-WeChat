@@ -1,36 +1,48 @@
-# 微信 Markdown 排版工具
+# vue-temp
 
-一个面向微信公众号后台粘贴场景的 Markdown 渲染工具。它把 Markdown 转成带内联样式的 HTML，支持实时预览、主题切换、自定义主题、模板写作、链接脚注、HTML 导出和富文本复制。
+This template should help get you started developing with Vue 3 in Vite.
 
-## 使用
+## Recommended IDE Setup
 
-直接打开 `index.html` 即可使用。也可以在当前目录启动本地服务：
+[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
 
-```bash
-python3 -m http.server 8000
+## Recommended Browser Setup
+
+- Chromium-based browsers (Chrome, Edge, Brave, etc.):
+  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
+  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
+- Firefox:
+  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
+  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+
+## Type Support for `.vue` Imports in TS
+
+TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+
+## Customize configuration
+
+See [Vite Configuration Reference](https://vite.dev/config/).
+
+## Project Setup
+
+```sh
+npm install
 ```
 
-然后访问 `http://localhost:8000`。
+### Compile and Hot-Reload for Development
 
-## 已支持
+```sh
+npm run dev
+```
 
-- Markdown 编辑与微信宽度预览
-- 增强 Markdown 解析：标题、引用、列表、任务列表、删除线、表格、图片、代码块
-- 11 套内容主题 + 1 套可保存的自定义主题
-- 3 套代码块主题，内置轻量代码高亮
-- 主题编辑器：主色、正文色、柔和底色、标题样式、字号、行高
-- 图片设置：宽度、圆角、alt 图注开关
-- 预览缩放和专注预览布局
-- 发布模板库：产品更新、技术文章、行业洞察、活动复盘、读书笔记
-- 自动保存草稿
-- 一键复制 `text/html` 和 `text/plain`
-- 复制前预检弹层，按严重、提醒、信息分类展示风险
-- 导出微信公众号排版 HTML 文件
-- Markdown 外链自动转文末脚注
-- 字数、阅读时间、标题数、图片数统计
-- 主题预览卡片快速切换
-- 本地图片、空链接、代码围栏、长内容、表格兼容性提示
+### Type-Check, Compile and Minify for Production
 
-## 当前边界
+```sh
+npm run build
+```
 
-当前保持无依赖静态实现，方便直接打开使用。解析层已覆盖公众号写作常用语法，但还不是完整 CommonMark 引擎；如果后续接受构建流程，可以接入 `markdown-it` 或 `remark/rehype`，再保留当前的微信公众号内联样式渲染层。
+### Lint with [ESLint](https://eslint.org/)
+
+```sh
+npm run lint
+```
