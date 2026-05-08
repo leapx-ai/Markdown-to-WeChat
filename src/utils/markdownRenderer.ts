@@ -354,9 +354,10 @@ export function renderMarkdown(markdown: string, theme: ThemeBase, codeTheme: Co
       })
       .join('')
     return inline(tag, items, {
-      margin: '0 0 18px 22px',
-      padding: '0',
+      margin: '0 0 18px 0',
+      paddingLeft: tag === 'ul' ? '20px' : '22px',
       color: theme.color,
+      listStyleType: tag === 'ul' ? 'disc' : 'decimal',
     })
   }
 
