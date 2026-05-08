@@ -9,7 +9,8 @@ export function useSmartFormat() {
       .replace(/\.\.\./g, '…')
       .replace(/\n\s*\n\s*\n/g, '\n\n')
       .replace(/^(#{1,6})([^\s#])/gm, '$1 $2')
-      .replace(/^([-*+])(?![-*+]{2,})([^\s])/gm, '$1 $2')
+      .replace(/^([-+])(?![-+])([^\s])/gm, '$1 $2')
+      .replace(/^(\*)(?!\*)([^\s])/gm, '$1 $2')
       .replace(/^(\d+\.)([^\s])/gm, '$1 $2')
   }
 

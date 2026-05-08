@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useEditorStore } from '@/stores/editor'
 import { useThemeStore } from '@/stores/theme'
 import { useSettingsStore } from '@/stores/settings'
@@ -30,6 +30,36 @@ const content = computed({
   get: () => editorStore.content,
   set: (v) => editorStore.setContent(v),
 })
+
+// Resizable splitter
+const mainRef = ref<HTMLElement>()
+const editorWidth = ref(560)
+const isDragging = ref(false)
+
+function onDragStart() {
+  isDragging.value = true
+  document.body.style.cursor = 'col-resize'
+  document.body.style.userSelect = 'none'
+}
+
+function onDragMove(e: MouseEvent) {
+  if (!isDragging.value || !mainRef.value) return
+  const rect = mainRef.value.getBoundingClientRect()
+  const gap = 16
+  const newWidth = e.clientX - rect.left - gap / 2
+  const minLeft = 280
+  const minRight = 360
+  const maxLeft = rect.width - gap - minRight
+  if (newWidth >= minLeft && newWidth <= maxLeft) {
+    editorWidth.value = newWidth
+  }
+}
+
+function onDragEnd() {
+  isDragging.value = false
+  document.body.style.cursor = ''
+  document.body.style.userSelect = ''
+}
 
 const { stats } = useMarkdownAnalyzer(content)
 const { warnings, preflightCounts } = useMarkdownWarnings(content)
@@ -64,6 +94,10 @@ watch(() => content.value, (v, oldV) => {
 })
 
 onMounted(() => {
+  if (mainRef.value) {
+    const rect = mainRef.value.getBoundingClientRect()
+    editorWidth.value = (rect.width - 68) / 2
+  }
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
       if (ui.activeModals.preflight) { ui.closeModal('preflight'); return }
@@ -81,6 +115,13 @@ onMounted(() => {
       }
     }
   })
+  document.addEventListener('mousemove', onDragMove)
+  document.addEventListener('mouseup', onDragEnd)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('mousemove', onDragMove)
+  document.removeEventListener('mouseup', onDragEnd)
 })
 </script>
 
@@ -100,11 +141,26 @@ onMounted(() => {
     style="max-height: calc(100dvh - 80px);"
   />
   <main
-    class="grid gap-4 p-4 min-h-0 grid-cols-[minmax(320px,1fr)_minmax(360px,520px)]"
+    ref="mainRef"
+    class="flex gap-4 p-4 min-h-0"
     style="height: calc(100dvh - 64px)"
   >
-    <EditorPane v-model="content" @load-sample="loadSample" />
-    <PreviewPane :html="renderedHtml" />
+    <EditorPane
+      v-model="content"
+      class="min-h-0 shrink-0"
+      :style="{ width: `${editorWidth}px` }"
+      @load-sample="loadSample"
+    />
+    <div
+      class="w-1 shrink-0 cursor-col-resize flex items-center justify-center group z-10"
+      @mousedown="onDragStart"
+    >
+      <div
+        class="w-0.5 h-8 rounded-full bg-border transition-colors"
+        :class="isDragging ? 'bg-accent' : 'group-hover:bg-accent'"
+      />
+    </div>
+    <PreviewPane :html="renderedHtml" class="flex-1 min-h-0" />
   </main>
 
   <Teleport to="body">

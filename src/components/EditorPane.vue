@@ -75,13 +75,18 @@ watch(() => props.modelValue, (v) => {
       <Transition name="fade">
         <div
           v-if="!modelValue"
-          class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 text-text-tertiary select-none cursor-pointer"
-          @click="emit('loadSample')"
+          class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 text-text-tertiary select-none pointer-events-none"
         >
           <AppIcon name="fileText" :size="32" class="opacity-40" />
           <div class="text-center">
             <p class="text-[13px] font-medium text-text-secondary mb-1">粘贴 Markdown 内容开始排版</p>
-            <p class="text-xs">或点击查看示例</p>
+            <button
+              type="button"
+              class="text-xs text-accent hover:underline pointer-events-auto"
+              @click="emit('loadSample')"
+            >
+              加载示例内容
+            </button>
           </div>
         </div>
       </Transition>
