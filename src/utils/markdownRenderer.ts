@@ -333,8 +333,8 @@ function renderAppendix(theme: ThemeBase, appendix?: RenderAppendix): string {
   }
 
   return `
-<div style="margin:28px 0 0;background:${theme.bgSoft};border-radius:6px;border-top:3px solid ${theme.accent};">${inner}
-</div>`
+<section style="margin:28px 0 0;background:${theme.bgSoft};border-radius:6px;border-top:3px solid ${theme.accent};">${inner}
+</section>`
 }
 
 export function renderMarkdown(markdown: string, theme: ThemeBase, codeTheme: CodeTheme, appendix?: RenderAppendix): string {
