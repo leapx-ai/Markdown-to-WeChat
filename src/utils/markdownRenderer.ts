@@ -307,26 +307,34 @@ export interface RenderAppendix {
 }
 function renderAppendix(theme: ThemeBase, appendix?: RenderAppendix): string {
   if (!appendix?.followEnabled && !appendix?.readMoreEnabled) return ''
-  let result = ''
   const name = escapeHtml(appendix.followName || '公众号名称')
   const slogan = escapeHtml(appendix.followSlogan || '感谢阅读，觉得有帮助可以分享给朋友')
+
+  // Build inner content blocks
+  let inner = ''
   if (appendix?.followEnabled) {
-    result += `
-<p style="margin:28px 0 0;padding:20px 16px 4px;background:${theme.bgSoft};text-align:center;border-top:3px solid ${theme.accent};">
-  <span style="color:${theme.muted};font-size:14px;line-height:1.6;">${slogan}</span>
-</p>
-<p style="margin:0;padding:4px 16px 20px;background:${theme.bgSoft};text-align:center;">
-  <strong style="color:${theme.accent};font-size:18px;line-height:1.4;letter-spacing:1px;">${name}</strong>
-</p>`
+    inner += `
+  <p style="margin:0;padding:20px 16px 4px;text-align:center;">
+    <span style="color:${theme.muted};font-size:14px;line-height:1.6;">${slogan}</span>
+  </p>
+  <p style="margin:0;padding:4px 16px;text-align:center;">
+    <strong style="color:${theme.accent};font-size:18px;line-height:1.4;letter-spacing:1px;">${name}</strong>
+  </p>`
   }
   if (appendix?.readMoreEnabled && appendix?.readMoreLink) {
     const link = escapeHtml(appendix.readMoreLink)
-    result += `
-<p style="margin:28px 0 0;padding:20px 16px;background:${theme.bgSoft};text-align:center;">
-  <a href="${link}" style="color:${theme.accent};font-size:14px;text-decoration:none;border-bottom:1px solid ${theme.accent};">🔗 阅读原文</a>
-</p>`
+    const divider = appendix?.followEnabled
+      ? '<hr style="width:40px;height:1px;border:0;background:' + theme.border + ';margin:8px auto 12px;">'
+      : ''
+    inner += `
+  <p style="margin:0;padding:${appendix?.followEnabled ? '0 16px 20px' : '20px 16px'};text-align:center;">
+    ${divider}<a href="${link}" style="color:${theme.accent};font-size:14px;text-decoration:none;border-bottom:1px solid ${theme.accent};">🔗 阅读原文</a>
+  </p>`
   }
-  return result
+
+  return `
+<div style="margin:28px 0 0;background:${theme.bgSoft};border-top:3px solid ${theme.accent};">${inner}
+</div>`
 }
 
 
