@@ -6,9 +6,7 @@
     <strong style="color:${e.accent};font-size:18px;line-height:1.4;letter-spacing:1px;">${n}</strong>
   </p>`),t?.readMoreEnabled&&t?.readMoreLink){let n=Cl(t.readMoreLink);t?.followEnabled&&(i+=`
   <hr style="width:36px;height:1px;border:0;background:${e.border};margin:0 auto 10px;">`);let r=t?.followEnabled?`0 18px 18px`:`22px 18px`;i+=`
-  <p style="margin:0;padding:${r};">
-    <center><a href="${n}" style="color:${e.accent};font-size:15px;text-decoration:none;">🔗 阅读原文</a></center>
-  </p>`}return`
+  <center style="padding:${r};"><a href="${n}" style="color:${e.accent};font-size:15px;text-decoration:none;">🔗 阅读原文</a></center>`}return`
 <div style="margin:28px 0 0;background:${e.bgSoft};border-radius:6px;border-top:3px solid ${e.accent};">${i}
 </div>`}function Vl(e,t,n,r){let i=e.replace(/\r\n/g,`
 `).split(`
