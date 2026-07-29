@@ -316,16 +316,16 @@ function renderAppendix(theme: ThemeBase, appendix?: RenderAppendix): string {
   <p style="margin:0;padding:22px 18px 2px;text-align:center;">
     <span style="color:${theme.muted};font-size:14px;line-height:1.7;">${slogan}</span>
   </p>
-  <p style="margin:0;padding:6px 18px 18px;text-align:center;">
+  <p style="margin:0;padding:4px 18px 10px;text-align:center;">
     <strong style="color:${theme.accent};font-size:18px;line-height:1.4;letter-spacing:1px;">${name}</strong>
   </p>`
   }
   if (appendix?.readMoreEnabled && appendix?.readMoreLink) {
     const link = escapeHtml(appendix.readMoreLink)
     const divider = appendix?.followEnabled
-      ? '<hr style="width:36px;height:1px;border:0;background:' + theme.border + ';margin:0 auto 14px;">'
+      ? '<hr style="width:36px;height:1px;border:0;background:' + theme.border + ';margin:0 auto 10px;">'
       : ''
-    const pad = appendix?.followEnabled ? '0 18px 22px' : '22px 18px'
+    const pad = appendix?.followEnabled ? '0 18px 18px' : '22px 18px'
     inner += `
   <p style="margin:0;padding:${pad};">
     ${divider}<center><a href="${link}" style="color:${theme.accent};font-size:15px;text-decoration:none;">🔗 阅读原文</a></center>
