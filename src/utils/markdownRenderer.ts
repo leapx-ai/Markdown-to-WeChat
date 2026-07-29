@@ -326,9 +326,8 @@ function renderAppendix(theme: ThemeBase, appendix?: RenderAppendix): string {
       inner += `
   <hr style="width:36px;height:1px;border:0;background:${theme.border};margin:0 auto 10px;">`
     }
-    const pad = appendix?.followEnabled ? '0 18px 18px' : '22px 18px'
     inner += `
-  <p style="margin:0;padding:${pad};text-align:center;">
+  <p style="margin:0;text-align:center;">
     <a href="${link}" style="color:${theme.accent};font-size:15px;text-decoration:none;display:block;">🔗 阅读原文</a>
   </p>`
   }
