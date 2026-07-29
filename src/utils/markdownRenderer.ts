@@ -322,13 +322,14 @@ function renderAppendix(theme: ThemeBase, appendix?: RenderAppendix): string {
   }
   if (appendix?.readMoreEnabled && appendix?.readMoreLink) {
     const link = escapeHtml(appendix.readMoreLink)
-    const divider = appendix?.followEnabled
-      ? '<hr style="width:36px;height:1px;border:0;background:' + theme.border + ';margin:0 auto 10px;">'
-      : ''
+    if (appendix?.followEnabled) {
+      inner += `
+  <hr style="width:36px;height:1px;border:0;background:${theme.border};margin:0 auto 10px;">`
+    }
     const pad = appendix?.followEnabled ? '0 18px 18px' : '22px 18px'
     inner += `
   <p style="margin:0;padding:${pad};">
-    ${divider}<center><a href="${link}" style="color:${theme.accent};font-size:15px;text-decoration:none;">🔗 阅读原文</a></center>
+    <center><a href="${link}" style="color:${theme.accent};font-size:15px;text-decoration:none;">🔗 阅读原文</a></center>
   </p>`
   }
 
