@@ -5,7 +5,7 @@
   <p style="margin:0;padding:4px 18px 10px;text-align:center;">
     <strong style="color:${e.accent};font-size:18px;line-height:1.4;letter-spacing:1px;">${n}</strong>
   </p>`),t?.readMoreEnabled&&t?.readMoreLink){let n=Cl(t.readMoreLink);t?.followEnabled&&(i+=`
-  <hr style="width:36px;height:1px;border:0;background:${e.border};margin:0 auto 10px;">`),i+=`
+  <hr style="width:36px;height:1px;border:0;background:${e.border};margin:10px auto;">`),i+=`
   <p style="margin:0;text-align:center;">
     <a href="${n}" style="color:${e.accent};font-size:15px;text-decoration:none;display:block;">🔗 阅读原文</a>
   </p>`}return`

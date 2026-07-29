@@ -324,7 +324,7 @@ function renderAppendix(theme: ThemeBase, appendix?: RenderAppendix): string {
     const link = escapeHtml(appendix.readMoreLink)
     if (appendix?.followEnabled) {
       inner += `
-  <hr style="width:36px;height:1px;border:0;background:${theme.border};margin:0 auto 10px;">`
+  <hr style="width:36px;height:1px;border:0;background:${theme.border};margin:10px auto;">`
     }
     inner += `
   <p style="margin:0;text-align:center;">
