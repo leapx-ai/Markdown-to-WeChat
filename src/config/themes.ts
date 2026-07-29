@@ -1,13 +1,5 @@
 import type { Theme, CodeTheme, CustomThemeSettings } from '@/types'
 
-const defaultLightBase = {
-  color: '#2f3033',
-  muted: '#7d858c',
-  border: '#e7e7e7',
-  bgSoft: '#f7fbf8',
-  quoteBg: '#f5f7f6',
-}
-
 export const themes: Record<string, Theme> = {
   classic: {
     name: '经典微信',
@@ -15,7 +7,11 @@ export const themes: Record<string, Theme> = {
     base: {
       fontFamily:
         "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif",
-      ...defaultLightBase,
+      color: '#2f3033',
+      muted: '#7d858c',
+      border: '#e7e7e7',
+      bgSoft: '#f7fbf8',
+      quoteBg: '#f5f7f6',
       accent: '#07c160',
       h1Mode: 'underline',
       headingMode: 'bar',
@@ -23,85 +19,51 @@ export const themes: Record<string, Theme> = {
     },
   },
   minimal: {
-    name: '极简阅读',
-    description: '留白克制，适合观点和长文。',
+    name: '极简黑白',
+    description: '纯黑白灰，克制留白，适合观点长文。',
     base: {
       fontFamily:
-        "'Optima', 'PingFang SC', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, sans-serif",
-      color: '#252525',
-      accent: '#111111',
-      muted: '#777777',
-      border: '#e5e2dc',
-      bgSoft: '#faf9f6',
-      quoteBg: '#f4f2ed',
+        "-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif",
+      color: '#1a1a1a',
+      accent: '#1a1a1a',
+      muted: '#888888',
+      border: '#e0e0e0',
+      bgSoft: '#fafafa',
+      quoteBg: '#f5f5f5',
       h1Mode: 'plain',
       headingMode: 'plain',
       quoteMode: 'soft',
     },
   },
-  tech: {
-    name: '技术博客',
-    description: '清晰理性，代码和表格更突出。',
-    base: {
-      fontFamily:
-        "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif",
-      color: '#263238',
-      accent: '#006d77',
-      muted: '#5f6b70',
-      border: '#c9dadd',
-      bgSoft: '#eef8f8',
-      quoteBg: '#edf6f7',
-      h1Mode: 'panel',
-      headingMode: 'chip',
-      quoteMode: 'panel',
-    },
-  },
-  business: {
-    name: '商务蓝',
-    description: '专业干净，适合报告和方案。',
-    base: {
-      fontFamily:
-        "-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif",
-      color: '#243042',
-      accent: '#2468a2',
-      muted: '#637083',
-      border: '#d4e0ea',
-      bgSoft: '#f0f6fb',
-      quoteBg: '#eef5fb',
-      h1Mode: 'underline',
-      headingMode: 'bar',
-      quoteMode: 'soft',
-    },
-  },
   magazine: {
-    name: '暖色杂志',
-    description: '温和有层次，适合叙事和访谈。',
+    name: '暖调杂志',
+    description: '衬线之美，适合叙事和深度访谈。',
     base: {
       fontFamily: "'Songti SC', 'STSong', 'Noto Serif CJK SC', 'SimSun', serif",
-      color: '#332b24',
-      accent: '#b14f2a',
-      muted: '#806f61',
-      border: '#ead8c7',
-      bgSoft: '#fff6ee',
-      quoteBg: '#fff3e9',
+      color: '#3d3229',
+      accent: '#c45a3a',
+      muted: '#8c7b6b',
+      border: '#e8d5c4',
+      bgSoft: '#fdf6ee',
+      quoteBg: '#faf0e4',
       h1Mode: 'center',
       headingMode: 'plain',
       quoteMode: 'soft',
     },
   },
   night: {
-    name: '夜读深灰',
-    description: '深色沉浸，适合夜读和专题。',
+    name: '暗夜模式',
+    description: '深色沉浸，适合夜间阅读。',
     base: {
       fontFamily:
         "'PingFang SC', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, sans-serif",
-      color: '#e8ecef',
-      accent: '#8ab4a6',
-      muted: '#b5bec5',
-      border: '#3b454c',
-      bgSoft: '#273038',
-      quoteBg: '#2b343b',
-      canvas: '#1f262c',
+      color: '#e4e8ec',
+      accent: '#7ecba1',
+      muted: '#9aa3ad',
+      border: '#3d4852',
+      bgSoft: '#1e272f',
+      quoteBg: '#232d36',
+      canvas: '#161c22',
       h1Mode: 'underline',
       headingMode: 'chip',
       quoteMode: 'panel',
@@ -146,6 +108,14 @@ export const CUSTOM_THEME_KEY = 'wechat-md-custom-theme'
 export const THEME_KEY = 'wechat-md-theme'
 export const CODE_THEME_KEY = 'wechat-md-code-theme'
 export const LAST_LIGHT_THEME_KEY = 'wechat-md-last-light-theme'
+
+const defaultLightBase = {
+  color: '#2f3033',
+  muted: '#7d858c',
+  border: '#e7e7e7',
+  bgSoft: '#f7fbf8',
+  quoteBg: '#f5f7f6',
+}
 
 export function getCustomThemeSettings(): CustomThemeSettings {
   const fallback: CustomThemeSettings = {
