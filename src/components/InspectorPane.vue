@@ -287,6 +287,22 @@ function locateWarning(type?: string) {
             class="w-full h-9 px-3 text-[13px] rounded-lg border border-border bg-surface text-text placeholder:text-text-tertiary focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
             @input="e => settingsStore.updateWechatElements({ followSlogan: (e.target as HTMLInputElement).value })"
           />
+          <label class="flex items-center gap-2.5 text-[13px] text-text-secondary cursor-pointer">
+            <input
+              type="checkbox"
+              :checked="settingsStore.wechatElements.readMoreEnabled"
+              @change="e => settingsStore.updateWechatElements({ readMoreEnabled: (e.target as HTMLInputElement).checked })"
+            />
+            <span>阅读原文</span>
+          </label>
+          <input
+            v-if="settingsStore.wechatElements.readMoreEnabled"
+            :value="settingsStore.wechatElements.readMoreLink"
+            type="text"
+            placeholder="原文链接（如：https://example.com/article）"
+            class="w-full h-9 px-3 text-[13px] rounded-lg border border-border bg-surface text-text placeholder:text-text-tertiary focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
+            @input="e => settingsStore.updateWechatElements({ readMoreLink: (e.target as HTMLInputElement).value })"
+          />
         </div>
       </section>
     </div>
