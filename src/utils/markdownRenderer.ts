@@ -310,33 +310,32 @@ function renderAppendix(theme: ThemeBase, appendix?: RenderAppendix): string {
   const name = escapeHtml(appendix.followName || '公众号名称')
   const slogan = escapeHtml(appendix.followSlogan || '感谢阅读，觉得有帮助可以分享给朋友')
 
-  // Build inner content blocks
   let inner = ''
   if (appendix?.followEnabled) {
     inner += `
-  <p style="margin:0;padding:20px 16px 4px;text-align:center;">
-    <span style="color:${theme.muted};font-size:14px;line-height:1.6;">${slogan}</span>
+  <p style="margin:0;padding:22px 18px 2px;text-align:center;">
+    <span style="color:${theme.muted};font-size:14px;line-height:1.7;">${slogan}</span>
   </p>
-  <p style="margin:0;padding:4px 16px;text-align:center;">
+  <p style="margin:0;padding:6px 18px 18px;text-align:center;">
     <strong style="color:${theme.accent};font-size:18px;line-height:1.4;letter-spacing:1px;">${name}</strong>
   </p>`
   }
   if (appendix?.readMoreEnabled && appendix?.readMoreLink) {
     const link = escapeHtml(appendix.readMoreLink)
     const divider = appendix?.followEnabled
-      ? '<hr style="width:40px;height:1px;border:0;background:' + theme.border + ';margin:8px auto 12px;">'
+      ? '<hr style="width:36px;height:1px;border:0;background:' + theme.border + ';margin:0 auto 14px;">'
       : ''
+    const pad = appendix?.followEnabled ? '0 18px 22px' : '22px 18px'
     inner += `
-  <p style="margin:0;padding:${appendix?.followEnabled ? '0 16px 20px' : '20px 16px'};text-align:center;">
-    ${divider}<a href="${link}" style="color:${theme.accent};font-size:14px;text-decoration:none;border-bottom:1px solid ${theme.accent};">🔗 阅读原文</a>
+  <p style="margin:0;padding:${pad};text-align:center;">
+    ${divider}<a href="${link}" style="color:${theme.accent};font-size:15px;text-decoration:none;">🔗 阅读原文</a>
   </p>`
   }
 
   return `
-<div style="margin:28px 0 0;background:${theme.bgSoft};border-top:3px solid ${theme.accent};">${inner}
+<div style="margin:28px 0 0;background:${theme.bgSoft};border-radius:6px;border-top:3px solid ${theme.accent};">${inner}
 </div>`
 }
-
 
 export function renderMarkdown(markdown: string, theme: ThemeBase, codeTheme: CodeTheme, appendix?: RenderAppendix): string {
   const lines = markdown.replace(/\r\n/g, '\n').split('\n')
