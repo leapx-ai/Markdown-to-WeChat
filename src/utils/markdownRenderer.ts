@@ -302,38 +302,20 @@ export interface RenderAppendix {
   followEnabled?: boolean
   followName?: string
   followSlogan?: string
-  readMoreEnabled?: boolean
-  readMoreLink?: string
 }
 function renderAppendix(theme: ThemeBase, appendix?: RenderAppendix): string {
-  if (!appendix?.followEnabled && !appendix?.readMoreEnabled) return ''
+  if (!appendix?.followEnabled) return ''
   const name = escapeHtml(appendix.followName || '公众号名称')
   const slogan = escapeHtml(appendix.followSlogan || '感谢阅读，觉得有帮助可以分享给朋友')
 
-  let inner = ''
-  if (appendix?.followEnabled) {
-    inner += `
+  return `
+<section style="margin:28px 0 0;background:${theme.bgSoft};border-radius:6px;border-top:3px solid ${theme.accent};">
   <p style="margin:0;padding:22px 18px 2px;text-align:center;">
     <span style="color:${theme.muted};font-size:14px;line-height:1.7;">${slogan}</span>
   </p>
-  <p style="margin:0;padding:4px 18px 10px;text-align:center;">
+  <p style="margin:0;padding:4px 18px 18px;text-align:center;">
     <strong style="color:${theme.accent};font-size:18px;line-height:1.4;letter-spacing:1px;">${name}</strong>
-  </p>`
-  }
-  if (appendix?.readMoreEnabled && appendix?.readMoreLink) {
-    const link = escapeHtml(appendix.readMoreLink)
-    if (appendix?.followEnabled) {
-      inner += `
-  <hr style="width:36px;height:1px;border:0;background:${theme.border};margin:10px auto;">`
-    }
-    inner += `
-  <p style="margin:0;text-align:center;">
-    <a href="${link}" style="color:${theme.accent};font-size:15px;text-decoration:none;display:block;">🔗 阅读原文</a>
-  </p>`
-  }
-
-  return `
-<section style="margin:28px 0 0;background:${theme.bgSoft};border-radius:6px;border-top:3px solid ${theme.accent};">${inner}
+  </p>
 </section>`
 }
 
