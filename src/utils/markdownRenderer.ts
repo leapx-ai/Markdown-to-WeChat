@@ -342,24 +342,25 @@ export function renderMarkdown(markdown: string, theme: ThemeBase, codeTheme: Co
   }
 
   function renderListNode(list: ListNode): string {
-    const tag = list.type
     const items = list.items
-      .map((item) => {
-        const content = parseInline(item.text, links) + (item.childrenHtml || '')
-        return inline('li', content, {
-          margin: '0 0 7px',
-          paddingLeft: '2px',
-          color: theme.color,
-          fontSize: themeFontSize(theme),
-          lineHeight: themeLineHeight(theme, 1.8),
-        })
+      .map((item, index) => {
+        const isTask = /^[☑☐]/.test(item.text)
+        const marker = isTask ? '' : list.type === 'ol' ? `${index + 1}. ` : '• '
+        const textHtml = marker + parseInline(item.text, links)
+        return (
+          inline('p', textHtml, {
+            margin: '0 0 7px',
+            paddingLeft: '2px',
+            color: theme.color,
+            fontSize: themeFontSize(theme),
+            lineHeight: themeLineHeight(theme, 1.8),
+          }) + (item.childrenHtml || '')
+        )
       })
       .join('')
-    return inline(tag, items, {
+    return inline('section', items, {
       margin: '0 0 18px 0',
-      paddingLeft: tag === 'ul' ? '20px' : '22px',
-      color: theme.color,
-      listStyleType: tag === 'ul' ? 'disc' : 'decimal',
+      paddingLeft: list.indent ? `${list.indent * 8}px` : undefined,
     })
   }
 
