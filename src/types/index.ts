@@ -13,6 +13,7 @@ export interface ThemeBase {
   fontSize?: number
   lineHeight?: number
   width?: number
+  textAlign?: 'left' | 'justify'
 }
 
 export interface Theme {
@@ -41,6 +42,7 @@ export interface CustomThemeSettings {
   headingMode: string
   quoteMode: string
   fontFamily: string
+  textAlign?: 'left' | 'justify'
 }
 
 export interface ImageSettings {
@@ -55,12 +57,6 @@ export interface Draft {
   content: string
   createdAt: string
   updatedAt: string
-}
-
-export interface Template {
-  name: string
-  category?: string
-  content: string
 }
 
 export interface WarningItem {

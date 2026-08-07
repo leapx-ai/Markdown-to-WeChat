@@ -172,12 +172,13 @@ function splitTableRow(line: string): string[] {
     .map((cell) => cell.trim())
 }
 
-function paragraphStyle(theme: ThemeBase): Record<string, string | number> {
+function paragraphStyle(theme: ThemeBase): Record<string, string | number | undefined> {
   return {
     margin: '0 0 16px',
     color: theme.color,
     fontSize: `${theme.fontSize || 16}px`,
     lineHeight: themeLineHeight(theme, 1.85),
+    textAlign: theme.textAlign === 'justify' ? 'justify' : undefined,
   }
 }
 

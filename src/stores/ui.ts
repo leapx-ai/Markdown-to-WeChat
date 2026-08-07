@@ -6,10 +6,8 @@ export const useUiStore = defineStore('ui', () => {
   const toasts = ref<ToastItem[]>([])
   const showSettings = ref(false)
   const activeModals = ref<Record<string, boolean>>({
-    draft: false,
     preflight: false,
     themeEditor: false,
-    shortcut: false,
   })
 
   let toastId = 0

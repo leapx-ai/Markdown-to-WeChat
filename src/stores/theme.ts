@@ -58,6 +58,7 @@ export const useThemeStore = defineStore('theme', () => {
         headingMode: settings.headingMode,
         quoteMode: settings.quoteMode,
         fontFamily: settings.fontFamily,
+        textAlign: settings.textAlign,
       }))
     } catch { /* ignore */ }
   }

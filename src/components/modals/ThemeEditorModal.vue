@@ -16,6 +16,7 @@ const width = ref(420)
 const h1Mode = ref<'underline' | 'center' | 'panel' | 'plain'>('underline')
 const headingMode = ref<'bar' | 'chip' | 'plain'>('bar')
 const quoteMode = ref<'bar' | 'panel' | 'soft'>('bar')
+const textAlign = ref<'left' | 'justify'>('left')
 const fontFamily = ref("-apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif")
 const colorInputRef = ref<HTMLInputElement | null>(null)
 
@@ -46,6 +47,11 @@ const quoteModes = [
   { label: '柔和', value: 'soft' },
 ]
 
+const textAligns = [
+  { label: '左对齐', value: 'left' },
+  { label: '两端对齐', value: 'justify' },
+]
+
 function close() {
   ui.closeModal('themeEditor')
 }
@@ -65,6 +71,7 @@ function applyToStore() {
     fontSize: fontSize.value,
     lineHeight: lineHeight.value,
     width: width.value,
+    textAlign: textAlign.value,
   })
   themeStore.currentThemeKey = 'custom'
 }
@@ -81,6 +88,7 @@ function reset() {
   h1Mode.value = 'underline'
   headingMode.value = 'bar'
   quoteMode.value = 'bar'
+  textAlign.value = 'left'
   fontFamily.value = "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif"
   applyToStore()
 }
@@ -94,6 +102,7 @@ function loadFromCurrentTheme() {
   h1Mode.value = (base.h1Mode as typeof h1Mode.value) || 'underline'
   headingMode.value = (base.headingMode as typeof headingMode.value) || 'bar'
   quoteMode.value = (base.quoteMode as typeof quoteMode.value) || 'bar'
+  textAlign.value = (base.textAlign as typeof textAlign.value) || 'left'
   fontFamily.value = base.fontFamily || "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif"
 }
 
@@ -106,6 +115,7 @@ let snapshot: {
   h1Mode: string
   headingMode: string
   quoteMode: string
+  textAlign: 'left' | 'justify'
   fontFamily: string
   prevThemeKey: string
 } | null = null
@@ -121,6 +131,7 @@ watch(isOpen, (open) => {
       h1Mode: h1Mode.value,
       headingMode: headingMode.value,
       quoteMode: quoteMode.value,
+      textAlign: textAlign.value,
       fontFamily: fontFamily.value,
       prevThemeKey: themeStore.currentThemeKey,
     }
@@ -128,7 +139,7 @@ watch(isOpen, (open) => {
 })
 
 watch(
-  [accent, fontSize, lineHeight, width, h1Mode, headingMode, quoteMode, fontFamily],
+  [accent, fontSize, lineHeight, width, h1Mode, headingMode, quoteMode, textAlign, fontFamily],
   () => {
     applyToStore()
   },
@@ -144,6 +155,7 @@ function cancel() {
     h1Mode.value = snapshot.h1Mode as 'underline' | 'center' | 'panel' | 'plain'
     headingMode.value = snapshot.headingMode as 'bar' | 'chip' | 'plain'
     quoteMode.value = snapshot.quoteMode as 'bar' | 'panel' | 'soft'
+    textAlign.value = snapshot.textAlign
     fontFamily.value = snapshot.fontFamily
     themeStore.currentThemeKey = snapshot.prevThemeKey
     applyToStore()
@@ -154,12 +166,14 @@ function cancel() {
 function setH1Mode(v: string) { h1Mode.value = v as typeof h1Mode.value }
 function setHeadingMode(v: string) { headingMode.value = v as typeof headingMode.value }
 function setQuoteMode(v: string) { quoteMode.value = v as typeof quoteMode.value }
+function setTextAlign(v: string) { textAlign.value = v as typeof textAlign.value }
 
 const previewHtml = computed(() => {
   const lh = lineHeight.value
   const fs = fontSize.value
   const w = width.value
   const ac = accent.value
+  const textJustify = textAlign.value === 'justify' ? 'text-align:justify;' : ''
 
   // H1 style based on mode (matching markdownRenderer.ts h1Style)
   let h1Style = ''
@@ -198,8 +212,8 @@ const previewHtml = computed(() => {
   return `<div style="max-width:${w}px;margin:0 auto;font-family:${fontFamily.value};">
 <h1 style="${h1Style}">标题示例</h1>
 <h2 style="margin:28px 0 14px;color:#2f3033;font-size:${fs + 4}px;font-weight:700;line-height:1.45;"><span style="${headingSpanStyle}">二级标题示例</span></h2>
-<p style="margin:0 0 14px;line-height:${lh};color:#2f3033;font-size:${fs}px;">这是正文内容示例，支持自定义字体大小、行高和行宽设置。你可以通过左侧的控件实时调整样式，右侧预览会同步反映变更。</p>
-<p style="margin:0 0 14px;line-height:${lh};color:#2f3033;font-size:${fs}px;">第二段文字用于展示段落间距与行高效果。合适的行高能显著提升长文阅读体验。</p>
+<p style="margin:0 0 14px;line-height:${lh};color:#2f3033;font-size:${fs}px;${textJustify}">这是正文内容示例，支持自定义字体大小、行高和行宽设置。你可以通过左侧的控件实时调整样式，右侧预览会同步反映变更。</p>
+<p style="margin:0 0 14px;line-height:${lh};color:#2f3033;font-size:${fs}px;${textJustify}">第二段文字用于展示段落间距与行高效果。合适的行高能显著提升长文阅读体验。</p>
 <blockquote style="${quoteStyle}">
   这是引用块示例，使用主色作为左侧边框。
 </blockquote>
@@ -408,6 +422,24 @@ function renderArticle(content, theme) {
                         ? 'bg-surface text-text shadow-sm font-semibold'
                         : 'text-text-tertiary hover:text-text'"
                       @click="setQuoteMode(m.value)"
+                    >
+                      {{ m.label }}
+                    </button>
+                  </div>
+                </div>
+
+                <div class="space-y-2">
+                  <span class="text-xs font-semibold text-text-secondary">正文对齐</span>
+                  <div class="flex gap-0.5 bg-bg rounded-xl p-1">
+                    <button
+                      v-for="m in textAligns"
+                      :key="m.value"
+                      type="button"
+                      class="flex-1 h-8 rounded-lg text-[12px] font-medium transition-all active:scale-95"
+                      :class="textAlign === m.value
+                        ? 'bg-surface text-text shadow-sm font-semibold'
+                        : 'text-text-tertiary hover:text-text'"
+                      @click="setTextAlign(m.value)"
                     >
                       {{ m.label }}
                     </button>

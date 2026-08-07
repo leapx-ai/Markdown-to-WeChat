@@ -127,6 +127,7 @@ export function getCustomThemeSettings(): CustomThemeSettings {
     headingMode: 'bar',
     quoteMode: 'bar',
     fontFamily: "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif",
+    textAlign: 'left',
   }
   try {
     const stored = localStorage.getItem(CUSTOM_THEME_KEY)
@@ -152,6 +153,7 @@ export function applyCustomThemeSettings(): Theme {
       fontSize: Number(custom.fontSize),
       lineHeight: Number(custom.lineHeight),
       width: Number(custom.width),
+      textAlign: custom.textAlign,
     },
   }
 }
