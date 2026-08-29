@@ -325,6 +325,7 @@ export function renderMarkdown(markdown: string, theme: ThemeBase, codeTheme: Co
   const links: Array<{ label: string; href: string }> = []
   let html = ''
   const paragraph: string[] = []
+  const quoteBuffer: string[] = []
   let inCode = false
   let codeLang = ''
   const codeBuffer: string[] = []
@@ -334,6 +335,15 @@ export function renderMarkdown(markdown: string, theme: ThemeBase, codeTheme: Co
     if (!paragraph.length) return
     html += inline('p', parseInline(paragraph.join(' '), links), paragraphStyle(theme))
     paragraph.length = 0
+  }
+
+  const flushQuote = () => {
+    if (!quoteBuffer.length) return
+    const content = quoteBuffer
+      .map((q) => parseInline(q.replace(/^>\s?/, ''), links))
+      .join('<br />')
+    html += inline('blockquote', content, quoteStyle(theme))
+    quoteBuffer.length = 0
   }
 
   function getListIndent(line: string): number {
@@ -428,8 +438,9 @@ export function renderMarkdown(markdown: string, theme: ThemeBase, codeTheme: Co
       } else {
         flushParagraph()
         flushAllLists()
+        flushQuote()
         inCode = true
-        codeLang = line.replace(/^```/, '').trim()
+        codeLang = line.replace(/^```/, '').trim().split(/\s+/)[0] || ''
       }
       continue
     }
@@ -442,6 +453,7 @@ export function renderMarkdown(markdown: string, theme: ThemeBase, codeTheme: Co
     if (!line) {
       flushParagraph()
       flushAllLists()
+      flushQuote()
       continue
     }
 
@@ -449,6 +461,7 @@ export function renderMarkdown(markdown: string, theme: ThemeBase, codeTheme: Co
     if (imageOnly) {
       flushParagraph()
       flushAllLists()
+      flushQuote()
       html += imageHtml(imageOnly[1], imageOnly[2])
       continue
     }
@@ -456,6 +469,7 @@ export function renderMarkdown(markdown: string, theme: ThemeBase, codeTheme: Co
     if (isTableStart(lines, i)) {
       flushParagraph()
       flushAllLists()
+      flushQuote()
       const headers = splitTableRow(lines[i])
       i += 2
       const rows: string[][] = []
@@ -519,6 +533,7 @@ export function renderMarkdown(markdown: string, theme: ThemeBase, codeTheme: Co
     if (heading) {
       flushParagraph()
       flushAllLists()
+      flushQuote()
       const level = heading[1].length
       const baseSize = theme.fontSize || 16
       const size = [0, baseSize + 8, baseSize + 4, baseSize + 2, baseSize][level]
@@ -545,13 +560,14 @@ export function renderMarkdown(markdown: string, theme: ThemeBase, codeTheme: Co
     if (/^>\s?/.test(line)) {
       flushParagraph()
       flushAllLists()
-      html += inline('blockquote', parseInline(line.replace(/^>\s?/, ''), links), quoteStyle(theme))
+      quoteBuffer.push(line)
       continue
     }
 
     if (/^(-{3,}|\*{3,})$/.test(line)) {
       flushParagraph()
       flushAllLists()
+      flushQuote()
       html += selfClosing('hr', {
         height: '1px',
         border: '0',
@@ -566,6 +582,7 @@ export function renderMarkdown(markdown: string, theme: ThemeBase, codeTheme: Co
     const ordered = /^(\s*)\d+\.\s+(.+)$/.exec(raw)
     if (task || unordered || ordered) {
       flushParagraph()
+      flushQuote()
       const indent = getListIndent(raw)
       const currentType = ordered ? 'ol' : 'ul'
       let content: string
@@ -607,12 +624,14 @@ export function renderMarkdown(markdown: string, theme: ThemeBase, codeTheme: Co
     }
 
     flushAllLists()
+    flushQuote()
     paragraph.push(line)
   }
 
   if (inCode) flushCode()
   flushParagraph()
   flushAllLists()
+  flushQuote()
 
   if (links.length) {
     const linkItems = links
