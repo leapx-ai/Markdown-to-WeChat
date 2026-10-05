@@ -68,7 +68,7 @@ npm run format
 
 ### 主题系统
 
-主题定义在 `src/config/themes.ts`。内置 4 套主题（`classic`、`minimal`、`magazine`、`night`），外加用户自定义的 `custom` 主题。浅色主题共享 `defaultLightBase` 对象中的常用中性色，避免重复。每个主题的 `base` 对象包含：
+主题定义在 `src/config/themes.ts`。内置 3 套主题（`classic`、`minimal`、`night`），外加用户自定义的 `custom` 主题。浅色主题共享 `defaultLightBase` 对象中的常用中性色，避免重复。按照微信公众号编辑器规范，**不建议设置 `font-family`**：内置主题均不设置 `fontFamily`（`ThemeBase.fontFamily` 为可选，空值时渲染器不输出该属性），让文章沿用公众号默认字体栈，避免 iOS 端字体渲染不一致。每个主题的 `base` 对象包含：
 
 - `h1Mode`：`'underline' | 'center' | 'panel' | 'plain'`
 - `headingMode`：`'bar' | 'chip' | 'plain'`
@@ -77,7 +77,7 @@ npm run format
 
 代码主题（`codeThemes`）定义语法高亮配色（3 套预设：light / dark / paper）。
 
-自定义主题编辑器（`ThemeEditorModal.vue`）允许用户调整主色（单行 8 个预设色块加自定义取色器）、字体、字号、行高、内容宽度、上面三个模式开关以及正文对齐开关。改动实时生效；取消时恢复打开弹窗时保存的快照。弹窗使用 `max-h-[85vh]`，控制面板与预览区内部各自滚动。
+自定义主题编辑器（`ThemeEditorModal.vue`）允许用户调整主色（单行 8 个预设色块加自定义取色器）、字体（默认「公众号默认」即不设置 font-family）、字号、行高、内容宽度、上面三个模式开关以及正文对齐开关。改动实时生效；取消时恢复打开弹窗时保存的快照。弹窗使用 `max-h-[85vh]`，控制面板与预览区内部各自滚动。
 
 ### 应用外壳与组件
 
@@ -97,7 +97,7 @@ npm run format
 
 ### 智能排版
 
-`src/composables/useSmartFormat.ts` 在首次粘贴时应用 CJK 排版修复：在中日韩字符与拉丁字母/数字之间补空格、把独立 `--` 替换为破折号、`...` 替换为省略号、折叠多余空行、规范标题与列表间距。
+`src/composables/useSmartFormat.ts` 在首次粘贴时应用 CJK 排版修复：在中日韩字符与拉丁字母/数字之间补空格、把独立 `--` 替换为破折号、`...` 替换为省略号、折叠多余空行、规范标题与列表间距。代码围栏（``` 块）内的内容会被整体跳过，避免破坏代码（如 `i--` 被改成 `i——`）。
 
 **重要：** 列表间距规则刻意保守，以避免破坏 Markdown 语法。它使用负向先行断言跳过构成分割线（`---`、`***`、`++++` 等）或行内加粗（`**text**`）的 `*`、`-`、`+` 序列。如果修改这些正则，请同时用列表项和分割线语法验证。
 

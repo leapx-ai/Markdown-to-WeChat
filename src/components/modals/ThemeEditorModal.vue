@@ -17,15 +17,15 @@ const h1Mode = ref<'underline' | 'center' | 'panel' | 'plain'>('underline')
 const headingMode = ref<'bar' | 'chip' | 'plain'>('bar')
 const quoteMode = ref<'bar' | 'panel' | 'soft'>('bar')
 const textAlign = ref<'left' | 'justify'>('left')
-const fontFamily = ref("-apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif")
+const fontFamily = ref('')
 const colorInputRef = ref<HTMLInputElement | null>(null)
 
 const presetColors = ['#07c160', '#111111', '#006d77', '#2468a2', '#b14f2a', '#8ab4a6', '#dc2626', '#7c3aed']
 
 const fontOptions = [
+  { label: '公众号默认', value: '' },
   { label: '系统默认', value: "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif" },
   { label: '宋体/衬线', value: "'Songti SC', 'STSong', 'Noto Serif CJK SC', 'SimSun', serif" },
-  { label: '优雅西文', value: "'Optima', 'PingFang SC', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, sans-serif" },
 ]
 
 const h1Modes = [
@@ -89,7 +89,7 @@ function reset() {
   headingMode.value = 'bar'
   quoteMode.value = 'bar'
   textAlign.value = 'left'
-  fontFamily.value = "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif"
+  fontFamily.value = ''
   applyToStore()
 }
 
@@ -103,7 +103,7 @@ function loadFromCurrentTheme() {
   headingMode.value = (base.headingMode as typeof headingMode.value) || 'bar'
   quoteMode.value = (base.quoteMode as typeof quoteMode.value) || 'bar'
   textAlign.value = (base.textAlign as typeof textAlign.value) || 'left'
-  fontFamily.value = base.fontFamily || "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif"
+  fontFamily.value = base.fontFamily || ''
 }
 
 // Snapshot to support cancel
@@ -209,7 +209,8 @@ const previewHtml = computed(() => {
     quoteStyle = `margin:18px 0;padding:12px 14px;border-left:4px solid ${ac};background:#f5f7f6;color:#7d858c;font-size:${quoteFontSize}px;line-height:${lh};`
   }
 
-  return `<div style="max-width:${w}px;margin:0 auto;font-family:${fontFamily.value};">
+  const fontFamilyCss = fontFamily.value ? `font-family:${fontFamily.value};` : ''
+  return `<div style="max-width:${w}px;margin:0 auto;${fontFamilyCss}">
 <h1 style="${h1Style}">标题示例</h1>
 <h2 style="margin:28px 0 14px;color:#2f3033;font-size:${fs + 4}px;font-weight:700;line-height:1.45;"><span style="${headingSpanStyle}">二级标题示例</span></h2>
 <p style="margin:0 0 14px;line-height:${lh};color:#2f3033;font-size:${fs}px;${textJustify}">这是正文内容示例，支持自定义字体大小、行高和行宽设置。你可以通过左侧的控件实时调整样式，右侧预览会同步反映变更。</p>

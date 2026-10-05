@@ -1,5 +1,5 @@
 export interface ThemeBase {
-  fontFamily: string
+  fontFamily?: string
   color: string
   accent: string
   muted: string
@@ -41,7 +41,7 @@ export interface CustomThemeSettings {
   h1Mode: string
   headingMode: string
   quoteMode: string
-  fontFamily: string
+  fontFamily?: string
   textAlign?: 'left' | 'justify'
 }
 
