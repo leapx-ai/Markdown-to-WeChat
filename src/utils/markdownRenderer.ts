@@ -122,7 +122,7 @@ export function safeUrl(url: string): string {
   }
 }
 
-function parseInline(text: string, links: Array<{ label: string; href: string }>): string {
+function parseInline(text: string, links: Array<{ label: string; href: string }>, theme?: ThemeBase, codeTheme?: CodeTheme): string {
   let value = escapeHtml(text)
 
   value = value.replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g, (_, alt, src) => {
@@ -136,21 +136,24 @@ function parseInline(text: string, links: Array<{ label: string; href: string }>
     if (!safeHref) return escapeHtml(`[${label}](${href})`)
     const id = links.findIndex((item) => item.href === safeHref)
     const index = id >= 0 ? id + 1 : links.push({ label, href: safeHref })
-    return `${label}<sup style="color:#888;font-size:12px;">[${index}]</sup>`
+    return `${label}<sup style="color:${theme?.strongColor || theme?.accent || '#888'};font-size:12px;">[${index}]</sup>`
   })
 
   value = value.replace(/`([^`]+)`/g, (_, code) =>
     inline('code', code, {
       padding: '2px 5px',
       borderRadius: '4px',
-      background: '#f0f2f4',
-      color: '#c43d3d',
+      background: codeTheme?.inlineBackground || '#f0f2f4',
+      color: codeTheme?.inlineColor || '#c43d3d',
       fontFamily: 'Menlo, Monaco, Consolas, monospace',
       fontSize: '0.92em',
     }),
   )
   value = value.replace(/~~([^~]+)~~/g, '<del>$1</del>')
-  value = value.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+  value = value.replace(
+    /\*\*([^*]+)\*\*/g,
+    theme?.strongColor ? `<strong style="color:${theme.strongColor};">$1</strong>` : '<strong>$1</strong>',
+  )
   value = value.replace(/\*([^*]+)\*/g, '<em>$1</em>')
   return value
 }
@@ -198,6 +201,7 @@ function h1Style(theme: ThemeBase): Record<string, string | number | undefined> 
     fontSize: `${baseSize + 8}px`,
     lineHeight: '1.36',
     fontWeight: '700',
+    letterSpacing: theme.headingSpacing || '1px',
   }
 
   if (theme.h1Mode === 'center') {
@@ -252,11 +256,15 @@ function headingContent(content: string, theme: ThemeBase): string {
     })
   }
 
-  return inline('span', content, {
+  return inline('span', '', {
     display: 'inline-block',
-    paddingLeft: '10px',
-    borderLeft: `4px solid ${theme.accent}`,
-  })
+    width: '4px',
+    height: '1em',
+    background: theme.accent,
+    borderRadius: '2px',
+    marginRight: '8px',
+    verticalAlign: '-0.12em',
+  }) + content
 }
 
 function quoteStyle(theme: ThemeBase): Record<string, string | number | undefined> {
@@ -281,6 +289,7 @@ function quoteStyle(theme: ThemeBase): Record<string, string | number | undefine
     return {
       ...base,
       padding: '13px 15px',
+      border: `1px solid ${theme.border}`,
       borderRadius: '8px',
       background: theme.quoteBg,
     }
@@ -290,6 +299,7 @@ function quoteStyle(theme: ThemeBase): Record<string, string | number | undefine
     ...base,
     padding: '12px 14px',
     borderLeft: `4px solid ${theme.accent}`,
+    borderRadius: '6px',
     background: theme.quoteBg,
   }
 }
@@ -333,16 +343,17 @@ export function renderMarkdown(markdown: string, theme: ThemeBase, codeTheme: Co
 
   const flushParagraph = () => {
     if (!paragraph.length) return
-    html += inline('p', parseInline(paragraph.join(' '), links), paragraphStyle(theme))
+    html += inline('p', parseInline(paragraph.join(' '), links, theme, codeTheme), paragraphStyle(theme))
     paragraph.length = 0
   }
 
   const flushQuote = () => {
     if (!quoteBuffer.length) return
     const content = quoteBuffer
-      .map((q) => parseInline(q.replace(/^>\s?/, ''), links))
+      .map((q) => parseInline(q.replace(/^>\s?/, ''), links, theme, codeTheme))
       .join('<br />')
-    html += inline('blockquote', content, quoteStyle(theme))
+    // 用 section 而非 blockquote：微信编辑器对 blockquote 标签有内置灰色左边框样式，会叠加显示
+    html += inline('section', content, quoteStyle(theme))
     quoteBuffer.length = 0
   }
 
@@ -356,7 +367,7 @@ export function renderMarkdown(markdown: string, theme: ThemeBase, codeTheme: Co
       .map((item, index) => {
         const isTask = /^[☑☐]/.test(item.text)
         const marker = isTask ? '' : list.type === 'ol' ? `${index + 1}. ` : '• '
-        const textHtml = marker + parseInline(item.text, links)
+        const textHtml = marker + parseInline(item.text, links, theme, codeTheme)
         return (
           inline('p', textHtml, {
             margin: '0 0 7px',
@@ -480,7 +491,7 @@ export function renderMarkdown(markdown: string, theme: ThemeBase, codeTheme: Co
       i -= 1
       const ths = headers
         .map((cell) =>
-          inline('th', parseInline(cell, links), {
+          inline('th', parseInline(cell, links, theme, codeTheme), {
             padding: '9px 8px',
             border: `1px solid ${theme.border}`,
             background: theme.bgSoft,
@@ -498,7 +509,7 @@ export function renderMarkdown(markdown: string, theme: ThemeBase, codeTheme: Co
             'tr',
             row
               .map((cell) =>
-                inline('td', parseInline(cell, links), {
+                inline('td', parseInline(cell, links, theme, codeTheme), {
                   padding: '9px 8px',
                   border: `1px solid ${theme.border}`,
                   color: theme.color,
@@ -538,7 +549,7 @@ export function renderMarkdown(markdown: string, theme: ThemeBase, codeTheme: Co
       const baseSize = theme.fontSize || 16
       const size = [0, baseSize + 8, baseSize + 4, baseSize + 2, baseSize][level]
       const marginTop = level === 1 ? '0' : '28px'
-      const content = parseInline(heading[2], links)
+      const content = parseInline(heading[2], links, theme, codeTheme)
       if (level === 1) {
         html += inline('h1', content, h1Style(theme))
       } else {
@@ -551,6 +562,7 @@ export function renderMarkdown(markdown: string, theme: ThemeBase, codeTheme: Co
             fontSize: `${size}px`,
             lineHeight: level === 4 ? themeLineHeight(theme, 1.45) : '1.45',
             fontWeight: '700',
+            letterSpacing: theme.headingSpacing ? '1px' : '0.5px',
           },
         )
       }
@@ -568,12 +580,21 @@ export function renderMarkdown(markdown: string, theme: ThemeBase, codeTheme: Co
       flushParagraph()
       flushAllLists()
       flushQuote()
-      html += selfClosing('hr', {
-        height: '1px',
-        border: '0',
-        background: theme.border,
-        margin: '26px 0',
-      })
+      html += selfClosing('hr', theme.hrShort
+        ? {
+            width: '40px',
+            height: '2px',
+            border: '0',
+            borderRadius: '1px',
+            background: theme.accent,
+            margin: '32px auto',
+          }
+        : {
+            height: '1px',
+            border: '0',
+            background: theme.border,
+            margin: '26px 0',
+          })
       continue
     }
 
@@ -673,9 +694,6 @@ export function renderMarkdown(markdown: string, theme: ThemeBase, codeTheme: Co
     {
       color: theme.color,
       fontFamily: theme.fontFamily,
-      background: theme.canvas,
-      padding: theme.canvas ? '18px' : undefined,
-      borderRadius: theme.canvas ? '8px' : undefined,
       fontSize: `${theme.fontSize || 16}px`,
       lineHeight: themeLineHeight(theme, 1.8),
     },

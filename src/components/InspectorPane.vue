@@ -188,7 +188,7 @@ function locateWarning(type?: string) {
             <span
               class="w-8 h-8 rounded-lg border shrink-0 grid place-items-center overflow-hidden transition-transform group-hover:scale-105 shadow-sm"
               :class="themeStore.currentThemeKey === key ? 'border-border' : 'border-border-subtle'"
-              :style="{ background: theme.base.canvas || theme.base.bgSoft }"
+              :style="{ background: theme.base.bgSoft }"
             >
               <span class="flex flex-col items-center gap-[3px]">
                 <span class="block w-4 h-[2px] rounded-full" :style="{ background: theme.base.accent }" />

@@ -11,9 +11,10 @@ export const themes: Record<string, Theme> = {
       bgSoft: '#f7fbf8',
       quoteBg: '#f5f7f6',
       accent: '#07c160',
+      strongColor: '#0a9d58',
       h1Mode: 'underline',
       headingMode: 'bar',
-      quoteMode: 'bar',
+      quoteMode: 'soft',
     },
   },
   minimal: {
@@ -22,29 +23,33 @@ export const themes: Record<string, Theme> = {
     base: {
       color: '#1a1a1a',
       accent: '#1a1a1a',
+      strongColor: '#000000',
+      headingSpacing: '2px',
+      hrShort: true,
       muted: '#888888',
       border: '#e0e0e0',
       bgSoft: '#fafafa',
-      quoteBg: '#f5f5f5',
+      quoteBg: '#ffffff',
       h1Mode: 'plain',
       headingMode: 'plain',
       quoteMode: 'soft',
     },
   },
-  night: {
-    name: '暗夜模式',
-    description: '深色沉浸，适合夜间阅读。',
+  warm: {
+    name: '暖米白',
+    description: '米白暖调，纸张质感，适合长文阅读。',
     base: {
-      color: '#e4e8ec',
-      accent: '#7ecba1',
-      muted: '#9aa3ad',
-      border: '#3d4852',
-      bgSoft: '#1e272f',
-      quoteBg: '#232d36',
-      canvas: '#161c22',
-      h1Mode: 'underline',
+      color: '#463f35',
+      accent: '#b5833f',
+      strongColor: '#9a6a2a',
+      hrShort: true,
+      muted: '#a69885',
+      border: '#e8dfd0',
+      bgSoft: '#faf6ec',
+      quoteBg: '#f6efe1',
+      h1Mode: 'center',
       headingMode: 'chip',
-      quoteMode: 'panel',
+      quoteMode: 'bar',
     },
   },
 }
@@ -59,6 +64,8 @@ export const codeThemes: Record<string, CodeTheme> = {
     string: '#0d7a56',
     comment: '#7a8490',
     number: '#cf222e',
+    inlineBackground: '#f0f2f4',
+    inlineColor: '#c43d3d',
   },
   dark: {
     name: '深色',
@@ -69,6 +76,8 @@ export const codeThemes: Record<string, CodeTheme> = {
     string: '#a6e3a1',
     comment: '#6c7086',
     number: '#fab387',
+    inlineBackground: '#2a2a3c',
+    inlineColor: '#a6e3a1',
   },
   paper: {
     name: '纸张',
@@ -79,13 +88,14 @@ export const codeThemes: Record<string, CodeTheme> = {
     string: '#3f6212',
     comment: '#8c7b6b',
     number: '#b45309',
+    inlineBackground: '#f1e9da',
+    inlineColor: '#9a3412',
   },
 }
 
 export const CUSTOM_THEME_KEY = 'wechat-md-custom-theme'
 export const THEME_KEY = 'wechat-md-theme'
 export const CODE_THEME_KEY = 'wechat-md-code-theme'
-export const LAST_LIGHT_THEME_KEY = 'wechat-md-last-light-theme'
 
 const defaultLightBase = {
   color: '#2f3033',

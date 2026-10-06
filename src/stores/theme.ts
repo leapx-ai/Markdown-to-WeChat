@@ -1,13 +1,12 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { useStorage } from '@vueuse/core'
-import { themes, codeThemes, applyCustomThemeSettings, THEME_KEY, CODE_THEME_KEY, LAST_LIGHT_THEME_KEY } from '@/config/themes'
+import { themes, codeThemes, applyCustomThemeSettings, THEME_KEY, CODE_THEME_KEY } from '@/config/themes'
 import type { Theme, CodeTheme } from '@/types'
 
 export const useThemeStore = defineStore('theme', () => {
   const storedTheme = useStorage(THEME_KEY, 'classic')
   const storedCodeTheme = useStorage(CODE_THEME_KEY, 'light')
-  const lastLightTheme = useStorage(LAST_LIGHT_THEME_KEY, 'classic')
 
   const currentThemeKey = computed({
     get: () => {
@@ -15,9 +14,6 @@ export const useThemeStore = defineStore('theme', () => {
       return (themes[key] || key === 'custom') ? key : 'classic'
     },
     set: (key: string) => {
-      if (key !== 'night') {
-        lastLightTheme.value = key
-      }
       storedTheme.value = key
     },
   })
@@ -42,11 +38,13 @@ export const useThemeStore = defineStore('theme', () => {
   const themeBase = computed(() => currentTheme.value.base)
 
   const setCustomTheme = (settings: Partial<Theme['base']>) => {
-    const baseTheme = themes[lastLightTheme.value]?.base ?? (themes.classic as Theme).base
+    const baseKey = currentThemeKey.value === 'custom' ? 'classic' : currentThemeKey.value
+    const baseTheme = themes[baseKey]?.base ?? (themes.classic as Theme).base
     customTheme.value = {
       name: '我的主题',
       description: '根据你的配色、字号和行宽保存。',
-      base: { ...baseTheme, ...settings },
+      // 自定义主题保持中性：不继承内置主题的个性 token（strongColor 等），由 settings 显式控制
+      base: { ...baseTheme, strongColor: undefined, headingSpacing: undefined, hrShort: undefined, ...settings },
     }
     try {
       localStorage.setItem('wechat-md-custom-theme', JSON.stringify({

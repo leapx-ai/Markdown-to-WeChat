@@ -62,18 +62,21 @@ npm run format
 ### 状态管理（Pinia）
 
 - `editorStore` — Markdown 内容（通过 `@vueuse/core` 持久化到 `localStorage`）、保存状态标签、CodeMirror view 引用。
-- `themeStore` — 当前主题与代码主题（已持久化）。支持内置主题加用户自定义的「custom」主题。`night` 是唯一深色画布主题。
+- `themeStore` — 当前主题与代码主题（已持久化）。支持内置主题加用户自定义的「custom」主题。
 - `settingsStore` — 预览缩放级别与公众号文末元素（`followEnabled`、`followName`、`followSlogan`）。
 - `uiStore` — 弹窗状态、Toast 通知、创作助手面板可见性。
 
 ### 主题系统
 
-主题定义在 `src/config/themes.ts`。内置 3 套主题（`classic`、`minimal`、`night`），外加用户自定义的 `custom` 主题。浅色主题共享 `defaultLightBase` 对象中的常用中性色，避免重复。按照微信公众号编辑器规范，**不建议设置 `font-family`**：内置主题均不设置 `fontFamily`（`ThemeBase.fontFamily` 为可选，空值时渲染器不输出该属性），让文章沿用公众号默认字体栈，避免 iOS 端字体渲染不一致。每个主题的 `base` 对象包含：
+主题定义在 `src/config/themes.ts`。内置 3 套主题（`classic`、`minimal`、`warm`），外加用户自定义的 `custom` 主题。浅色主题共享 `defaultLightBase` 对象中的常用中性色，避免重复。按照微信公众号编辑器规范，**不建议设置 `font-family`**：内置主题均不设置 `fontFamily`（`ThemeBase.fontFamily` 为可选，空值时渲染器不输出该属性），让文章沿用公众号默认字体栈，避免 iOS 端字体渲染不一致。每个主题的 `base` 对象包含：
 
 - `h1Mode`：`'underline' | 'center' | 'panel' | 'plain'`
-- `headingMode`：`'bar' | 'chip' | 'plain'`
+- `headingMode`：`'bar' | 'chip' | 'plain'`（bar 是圆角胶囊竖条 + 文字，不是 border-left）
 - `quoteMode`：`'bar' | 'panel' | 'soft'`
 - `textAlign`：`'left' | 'justify'`（作用于段落文本）
+- `strongColor`（可选）：加粗文字与脚注上标的着色，未设置时加粗保持默认黑色
+- `headingSpacing`（可选）：H1 字距（默认 1px；H2–H4 固定 0.5px，设置后为 1px）
+- `hrShort`（可选）：分割线渲染为 40px 居中 accent 色短线，而非通栏灰线
 
 代码主题（`codeThemes`）定义语法高亮配色（3 套预设：light / dark / paper）。
 
@@ -108,7 +111,7 @@ npm run format
 ## 样式约定
 
 - 应用界面使用 Tailwind CSS v4 工具类。自定义设计令牌定义在 `src/styles/main.css` 的 `@theme` 下。
-- 深色模式通过 `<html>` 上的 `.dark` class 切换；预览画布的深色主题是 `night` 主题（并非 Tailwind 的深色模式）。
+- 深色模式通过 `<html>` 上的 `.dark` class 切换（仅应用界面；文章输出无深色主题——公众号阅读页底色由微信控制，深色主题只能以深色卡片形式存在，效果不佳，已移除）。
 - 渲染出的预览 HTML **只能使用内联样式**——绝不要给 `renderMarkdown` 的输出添加 class 名。
 - 应用使用统一的按钮样式：主操作用 `bg-[#18181b] text-white border border-[#18181b]`，次操作用 `bg-surface text-text border border-border`。
 
@@ -123,4 +126,5 @@ npm run format
 - 项目不使用传统 Markdown 解析库；对 Markdown 支持的修改必须在 `src/utils/markdownRenderer.ts` 中进行。
 - `src/utils/markdownRenderer.ts` 带有 `// @ts-nocheck`，因为 `tsconfig.app.json` 开启的 `noUncheckedIndexedAccess` 会在解析器的数组/索引访问处产生大量误报。如果重构该文件并移除该指令，必须守卫每一处 `lines[i]`、正则捕获组和栈顶访问。
 - 所有 `localStorage` 键都以 `wechat-md-` 为前缀。
+- 引用块输出用 `<section>` 而非 `<blockquote>`：公众号编辑器对 blockquote 标签有内置的灰色左边框样式，粘贴后会与内联样式叠加。
 - `docs/` 是已提交的构建产物（GitHub Pages）。不要手工编辑；用 `npm run build` 重新生成。lint 的 `--fix` 会破坏它——把 lint 限定在 `src/`。

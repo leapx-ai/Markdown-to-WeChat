@@ -10,7 +10,7 @@ export const sampleMarkdown = `# Markdown 排版演示
 - [Markdown 官方文档](https://markdown.com.cn/) 会自动转成文末脚注
 - 任务列表：
   - [x] 主题切换
-  - [ ] 深色模式
+  - [ ] 自定义主题
 
 ## 代码块
 
@@ -30,7 +30,7 @@ function render(article: Article): string {
 
 | 特性 | 状态 | 说明 |
 |------|------|------|
-| 主题系统 | 已支持 | 4 套内置主题 + 自定义 |
+| 主题系统 | 已支持 | 3 套内置主题 + 自定义 |
 | 代码高亮 | 已支持 | 浅色 / 深色 / 纸张 |
 | 智能排版 | 已支持 | 自动优化 CJK 间距 |
 

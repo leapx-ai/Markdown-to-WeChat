@@ -93,8 +93,8 @@ function reset() {
   applyToStore()
 }
 
-function loadFromCurrentTheme() {
-  const base = themeStore.currentTheme.base
+function loadFromCustomTheme() {
+  const base = themeStore.customTheme.base
   accent.value = base.accent || '#07c160'
   fontSize.value = base.fontSize || 16
   lineHeight.value = base.lineHeight || 1.8
@@ -122,7 +122,7 @@ let snapshot: {
 
 watch(isOpen, (open) => {
   if (open) {
-    loadFromCurrentTheme()
+    loadFromCustomTheme()
     snapshot = {
       accent: accent.value,
       fontSize: fontSize.value,
@@ -179,23 +179,23 @@ const previewHtml = computed(() => {
   let h1Style = ''
   const h1Size = fs + 8
   if (h1Mode.value === 'center') {
-    h1Style = `margin:0 0 24px;color:#2f3033;font-size:${h1Size}px;font-weight:700;line-height:1.36;text-align:center;padding:8px 0 18px;border-bottom:1px solid #e7e7e7;`
+    h1Style = `margin:0 0 24px;color:#2f3033;font-size:${h1Size}px;font-weight:700;line-height:1.36;letter-spacing:1px;text-align:center;padding:8px 0 18px;border-bottom:1px solid #e7e7e7;`
   } else if (h1Mode.value === 'panel') {
-    h1Style = `margin:0 0 24px;color:#2f3033;font-size:${h1Size}px;font-weight:700;line-height:1.36;padding:18px;border:1px solid #e7e7e7;border-radius:8px;background:#f7fbf8;`
+    h1Style = `margin:0 0 24px;color:#2f3033;font-size:${h1Size}px;font-weight:700;line-height:1.36;letter-spacing:1px;padding:18px;border:1px solid #e7e7e7;border-radius:8px;background:#f7fbf8;`
   } else if (h1Mode.value === 'plain') {
-    h1Style = `margin:0 0 24px;color:#2f3033;font-size:${h1Size}px;font-weight:700;line-height:1.36;padding:0 0 4px;`
+    h1Style = `margin:0 0 24px;color:#2f3033;font-size:${h1Size}px;font-weight:700;line-height:1.36;letter-spacing:1px;padding:0 0 4px;`
   } else {
-    h1Style = `margin:0 0 24px;color:#2f3033;font-size:${h1Size}px;font-weight:700;line-height:1.36;padding:0 0 12px;border-bottom:2px solid ${ac};`
+    h1Style = `margin:0 0 24px;color:#2f3033;font-size:${h1Size}px;font-weight:700;line-height:1.36;letter-spacing:1px;padding:0 0 12px;border-bottom:2px solid ${ac};`
   }
 
-  // Heading content span (matching markdownRenderer.ts headingContent)
-  let headingSpanStyle = ''
+  // Heading content (matching markdownRenderer.ts headingContent)
+  let headingContentHtml = ''
   if (headingMode.value === 'chip') {
-    headingSpanStyle = `display:inline-block;padding:5px 10px;border-radius:6px;background:#f7fbf8;color:${ac};`
+    headingContentHtml = `<span style="display:inline-block;padding:5px 10px;border-radius:6px;background:#f7fbf8;color:${ac};">二级标题示例</span>`
   } else if (headingMode.value === 'plain') {
-    headingSpanStyle = `display:inline-block;padding-bottom:3px;border-bottom:1px solid ${ac};`
+    headingContentHtml = `<span style="display:inline-block;padding-bottom:3px;border-bottom:1px solid ${ac};">二级标题示例</span>`
   } else {
-    headingSpanStyle = `display:inline-block;padding-left:10px;border-left:4px solid ${ac};`
+    headingContentHtml = `<span style="display:inline-block;width:4px;height:1em;background:${ac};border-radius:2px;margin-right:8px;vertical-align:-0.12em;"></span>二级标题示例`
   }
 
   // Quote style (matching markdownRenderer.ts quoteStyle)
@@ -204,20 +204,20 @@ const previewHtml = computed(() => {
   if (quoteMode.value === 'panel') {
     quoteStyle = `margin:18px 0;padding:14px 15px;border:1px solid #e7e7e7;border-radius:8px;background:#f5f7f6;color:#7d858c;font-size:${quoteFontSize}px;line-height:${lh};`
   } else if (quoteMode.value === 'soft') {
-    quoteStyle = `margin:18px 0;padding:13px 15px;border-radius:8px;background:#f5f7f6;color:#7d858c;font-size:${quoteFontSize}px;line-height:${lh};`
+    quoteStyle = `margin:18px 0;padding:13px 15px;border:1px solid #e7e7e7;border-radius:8px;background:#f5f7f6;color:#7d858c;font-size:${quoteFontSize}px;line-height:${lh};`
   } else {
-    quoteStyle = `margin:18px 0;padding:12px 14px;border-left:4px solid ${ac};background:#f5f7f6;color:#7d858c;font-size:${quoteFontSize}px;line-height:${lh};`
+    quoteStyle = `margin:18px 0;padding:12px 14px;border-left:4px solid ${ac};border-radius:6px;background:#f5f7f6;color:#7d858c;font-size:${quoteFontSize}px;line-height:${lh};`
   }
 
   const fontFamilyCss = fontFamily.value ? `font-family:${fontFamily.value};` : ''
   return `<div style="max-width:${w}px;margin:0 auto;${fontFamilyCss}">
 <h1 style="${h1Style}">标题示例</h1>
-<h2 style="margin:28px 0 14px;color:#2f3033;font-size:${fs + 4}px;font-weight:700;line-height:1.45;"><span style="${headingSpanStyle}">二级标题示例</span></h2>
+<h2 style="margin:28px 0 14px;color:#2f3033;font-size:${fs + 4}px;font-weight:700;line-height:1.45;letter-spacing:0.5px;">${headingContentHtml}</h2>
 <p style="margin:0 0 14px;line-height:${lh};color:#2f3033;font-size:${fs}px;${textJustify}">这是正文内容示例，支持自定义字体大小、行高和行宽设置。你可以通过左侧的控件实时调整样式，右侧预览会同步反映变更。</p>
 <p style="margin:0 0 14px;line-height:${lh};color:#2f3033;font-size:${fs}px;${textJustify}">第二段文字用于展示段落间距与行高效果。合适的行高能显著提升长文阅读体验。</p>
-<blockquote style="${quoteStyle}">
+<section style="${quoteStyle}">
   这是引用块示例，使用主色作为左侧边框。
-</blockquote>
+</section>
 <pre style="margin:18px 0;padding:16px;background:#f8fafc;border-radius:8px;overflow-x:auto;border:1px solid #e4e8ee;"><code style="font-family:Menlo,Monaco,Consolas,monospace;font-size:13px;line-height:1.7;color:#2f3033;">// 优雅的排版，从细节开始
 function renderArticle(content, theme) {
   const { fontSize, lineHeight, accent } = theme;

@@ -6,7 +6,9 @@ export interface ThemeBase {
   border: string
   bgSoft: string
   quoteBg: string
-  canvas?: string
+  strongColor?: string
+  headingSpacing?: string
+  hrShort?: boolean
   h1Mode: string
   headingMode: string
   quoteMode: string
@@ -31,6 +33,8 @@ export interface CodeTheme {
   string: string
   comment: string
   number: string
+  inlineBackground?: string
+  inlineColor?: string
 }
 
 export interface CustomThemeSettings {
