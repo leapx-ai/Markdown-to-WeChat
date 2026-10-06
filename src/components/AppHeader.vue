@@ -53,7 +53,7 @@ function handleExport() {
 
 <template>
   <header
-    class="flex items-center justify-between gap-4 h-16 px-5 sticky top-0 z-50 backdrop-blur-xl bg-white/85 border-b border-border-subtle shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
+    class="glass flex items-center justify-between gap-4 h-14 px-5 sticky top-3 z-50 mx-4 rounded-full"
   >
     <div>
       <p class="text-[11px] font-semibold tracking-widest uppercase text-text-tertiary mb-0.5">
@@ -64,7 +64,7 @@ function handleExport() {
       </h1>
     </div>
     <!-- Stats -->
-    <div class="hidden md:flex items-center gap-1 text-[11px] text-text-tertiary bg-bg/60 border border-border-subtle rounded-xl px-3.5 py-2">
+    <div class="hidden md:flex items-center gap-1 text-[11px] text-text-tertiary glass rounded-full px-3.5 py-2">
       <span class="flex items-center gap-1.5 tabular-nums">
         <strong class="text-text font-bold text-sm">{{ stats.wordCount }}</strong>
         <span>字</span>
@@ -89,13 +89,13 @@ function handleExport() {
     <div class="flex items-center gap-2.5">
       <div class="flex items-center gap-1.5">
         <span class="text-[10px] text-text-tertiary font-medium tracking-wider">主题</span>
-        <div class="flex items-center gap-0.5 bg-bg/60 border border-border-subtle rounded-xl p-1">
+        <div class="flex items-center gap-0.5 glass rounded-full p-1">
           <button
             v-for="[key, theme] in themeList"
             :key="key"
             type="button"
             :title="theme.name"
-            class="w-7 h-7 rounded-lg border-2 transition-all active:scale-90 relative overflow-hidden"
+            class="w-7 h-7 rounded-full border-2 transition-all active:scale-90 relative overflow-hidden"
             :class="themeStore.currentThemeKey === key
               ? 'border-white shadow-md scale-110'
               : 'border-white/40 hover:border-white hover:scale-105 shadow-sm'
@@ -114,13 +114,13 @@ function handleExport() {
       </div>
       <div class="flex items-center gap-1.5">
         <span class="text-[10px] text-text-tertiary font-medium tracking-wider">代码</span>
-        <div class="flex items-center gap-0.5 bg-bg/60 border border-border-subtle rounded-xl p-1">
+        <div class="flex items-center gap-0.5 glass rounded-full p-1">
           <button
             v-for="[key, theme] in codeThemeList"
             :key="key"
             type="button"
             :title="theme.name"
-            class="w-7 h-7 rounded-lg border-2 transition-all active:scale-90 relative overflow-hidden"
+            class="w-7 h-7 rounded-full border-2 transition-all active:scale-90 relative overflow-hidden"
             :class="themeStore.currentCodeThemeKey === key
               ? 'border-white shadow-md scale-110'
               : 'border-white/40 hover:border-white hover:scale-105 shadow-sm'
@@ -144,7 +144,7 @@ function handleExport() {
       </div>
       <button
         type="button"
-        class="w-9 h-9 flex items-center justify-center rounded-xl text-text-tertiary hover:text-text hover:bg-surface-hover border border-border-subtle hover:border-border bg-transparent transition-all relative active:scale-95"
+        class="w-9 h-9 flex items-center justify-center rounded-full text-text-tertiary hover:text-text hover:bg-surface-hover border border-border-subtle hover:border-border bg-transparent transition-all relative active:scale-95"
         :class="{ 'text-accent bg-accent/10 border-accent/30': ui.showSettings }"
         @click="ui.toggleSettings"
       >
@@ -158,7 +158,7 @@ function handleExport() {
       </button>
       <button
         type="button"
-        class="h-9 px-3 rounded-xl text-[13px] font-medium bg-surface text-text border border-border hover:bg-surface-hover active:scale-[0.96] transition-all inline-flex items-center gap-1.5"
+        class="h-9 px-3.5 rounded-full text-[13px] font-medium bg-surface text-text border border-border hover:bg-surface-hover active:scale-[0.96] transition-all inline-flex items-center gap-1.5"
         @click="handleExport"
       >
         <AppIcon name="download" :size="14" />
@@ -166,7 +166,7 @@ function handleExport() {
       </button>
       <button
         type="button"
-        class="h-9 px-4 rounded-xl text-[13px] font-semibold bg-[#18181b] !text-white border border-[#18181b] hover:bg-[#27272a] hover:border-[#27272a] active:scale-[0.96] transition-all inline-flex items-center gap-2 shadow-sm hover:shadow-md"
+        class="h-9 px-4 rounded-full text-[13px] font-semibold bg-[#18181b] !text-white border border-[#18181b] hover:bg-[#27272a] hover:border-[#27272a] active:scale-[0.96] transition-all inline-flex items-center gap-2 shadow-sm hover:shadow-md"
         style="color: #ffffff;"
         @click="handleCopy"
       >

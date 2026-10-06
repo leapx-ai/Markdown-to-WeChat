@@ -16,7 +16,7 @@ const previewStyle = computed(() => ({
 
 <template>
   <section
-    class="animate-panel-2 flex flex-col min-h-0 rounded-2xl bg-surface shadow-sm overflow-hidden border border-border-subtle dark:border dark:border-border"
+    class="animate-panel-2 glass flex flex-col min-h-0 rounded-[24px] overflow-hidden"
     aria-label="微信公众号预览区"
   >
     <div class="flex items-center justify-between gap-3 h-11 px-4 shrink-0 text-[11px] font-semibold tracking-widest uppercase text-text-tertiary border-b border-border-subtle dark:border-border">
@@ -25,7 +25,7 @@ const previewStyle = computed(() => ({
     </div>
     <div class="flex-1 min-h-0 overflow-auto flex items-start justify-center">
       <article
-        class="w-full min-h-full p-8 pb-10 break-words origin-top"
+        class="w-full min-h-full p-8 pb-10 break-words origin-top bg-white"
         :style="previewStyle"
         v-html="html"
       />

@@ -66,7 +66,7 @@ export interface Draft {
 export interface WarningItem {
   level: 'danger' | 'warn' | 'info' | 'ok'
   text: string
-  type?: 'localImage' | 'emptyLink' | 'unclosedCode' | 'multiH1' | 'deepHeading' | 'externalLink' | 'manyTables' | 'longLine' | 'longCode' | 'fewHeadings' | 'noHeading'
+  type?: 'localImage' | 'emptyLink' | 'unclosedCode' | 'multiH1' | 'deepHeading' | 'externalLink' | 'manyTables' | 'longLine' | 'longCode' | 'fewHeadings' | 'noHeading' | 'mermaid'
 }
 
 export interface MarkdownStats {

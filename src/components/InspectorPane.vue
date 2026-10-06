@@ -72,6 +72,7 @@ function locateWarning(type?: string) {
     externalLink: ['](http'],
     manyTables: ['| '],
     longCode: ['```'],
+    mermaid: ['```mermaid'],
     fewHeadings: ['# '],
     noHeading: [],
   }
@@ -89,7 +90,7 @@ function locateWarning(type?: string) {
 
 <template>
   <aside
-    class="flex flex-col rounded-2xl bg-surface overflow-hidden border border-border-subtle shadow-lg"
+    class="glass flex flex-col rounded-[24px] overflow-hidden"
     aria-label="创作助手"
   >
     <div class="flex-1 overflow-y-auto px-3 pb-3 space-y-3 pt-3">

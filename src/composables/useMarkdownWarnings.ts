@@ -91,6 +91,14 @@ export function useMarkdownWarnings(markdownRef: { value: string }) {
         type: 'longCode',
       })
     }
+    const mermaidBlocks = codeBlocks.filter((block) => /^```mermaid\b/i.test(block.trimStart()))
+    if (mermaidBlocks.length) {
+      result.push({
+        level: 'info',
+        text: `检测到 ${mermaidBlocks.length} 个 Mermaid 代码块，本工具不渲染 Mermaid 图形，粘贴到公众号后将显示为代码文本。建议先在支持 Mermaid 的工具中导出为图片再插入。`,
+        type: 'mermaid',
+      })
+    }
     if (wordCount > 2800 && headings.length < 3) {
       result.push({
         level: 'info',

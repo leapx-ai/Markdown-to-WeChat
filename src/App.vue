@@ -143,7 +143,7 @@ onUnmounted(() => {
   <main
     ref="mainRef"
     class="flex gap-4 p-4 min-h-0"
-    style="height: calc(100dvh - 64px)"
+    style="height: calc(100dvh - 68px)"
   >
     <EditorPane
       v-model="content"
@@ -168,7 +168,7 @@ onUnmounted(() => {
       <div
         v-for="toast in ui.toasts"
         :key="toast.id"
-        class="px-5 py-3 rounded-md bg-surface shadow-xl text-sm font-medium max-w-[360px] leading-relaxed"
+        class="glass px-5 py-3 rounded-full text-sm font-medium max-w-[360px] leading-relaxed"
         :class="toast.type === 'success' ? 'text-success' : 'text-danger'"
       >
         {{ toast.message }}

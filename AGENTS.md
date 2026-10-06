@@ -92,7 +92,7 @@ npm run format
 
 ### 警告 / 预检系统
 
-`src/composables/useMarkdownWarnings.ts` 分析当前 Markdown，针对常见公众号兼容性问题生成警告（danger / warn / info）：本地图片、空链接、未闭合代码围栏、多个一级标题、过深标题层级、外链、表格过多、超长行、超长代码块、标题密度过低。
+`src/composables/useMarkdownWarnings.ts` 分析当前 Markdown，针对常见公众号兼容性问题生成警告（danger / warn / info）：本地图片、空链接、未闭合代码围栏、多个一级标题、过深标题层级、外链、表格过多、超长行、超长代码块、Mermaid 代码块（不渲染，提示导出为图片）、标题密度过低。
 
 `danger` 级别的阻塞警告会阻止一键复制，改为弹出预检弹窗。创作助手面板中的每条警告卡片可点击，并把 CodeMirror 光标跳转到问题所在位置（`InspectorPane.vue` 中的 `locateWarning`）。
 
@@ -111,6 +111,7 @@ npm run format
 ## 样式约定
 
 - 应用界面使用 Tailwind CSS v4 工具类。自定义设计令牌定义在 `src/styles/main.css` 的 `@theme` 下。
+- 应用 UI 走 Liquid Glass（iOS 26+）风格：body 是极光渐变背景，面板/浮层统一用 `main.css` 里的 `.glass` 工具类（半透明白 + backdrop-blur + 顶部内高光），控件胶囊化（rounded-full）。新界面元素沿用 `.glass`，不要退回实色卡片 + 重边框。
 - 深色模式通过 `<html>` 上的 `.dark` class 切换（仅应用界面；文章输出无深色主题——公众号阅读页底色由微信控制，深色主题只能以深色卡片形式存在，效果不佳，已移除）。
 - 渲染出的预览 HTML **只能使用内联样式**——绝不要给 `renderMarkdown` 的输出添加 class 名。
 - 应用使用统一的按钮样式：主操作用 `bg-[#18181b] text-white border border-[#18181b]`，次操作用 `bg-surface text-text border border-border`。
